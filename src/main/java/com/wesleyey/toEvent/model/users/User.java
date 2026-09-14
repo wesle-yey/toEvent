@@ -1,16 +1,14 @@
 package com.wesleyey.toEvent.model.users;
 
-import lombok.Builder;
 import lombok.Data;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.annotation.Id;
 
 @Data
-@Builder
-@Document(collection = "users")
+@Document
 public class User {
     @Id
-    private Id id;
+    private String id;
 
     private String name;
 

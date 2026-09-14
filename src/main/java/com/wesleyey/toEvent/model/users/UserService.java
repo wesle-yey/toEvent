@@ -1,9 +1,6 @@
 package com.wesleyey.toEvent.model.users;
 
-import org.springframework.data.annotation.Id;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 @Service
 public class UserService {
@@ -13,21 +10,17 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public UserResponseDTO getUserById(Id id) throws Exception {
-        if (id != null) {
-            try {
-                Optional<User> myUser= userRepository.findById(id);
-                if (myUser.isPresent()) {
-                    User user = myUser.get();
-                    return new UserResponseDTO(user.getName(), user.getEmail());
-                }
-            }  catch (Exception e) {
-                throw new Exception(e.getMessage());
-            }
-        } else {
-            return null;
-        }
+    public UserResponseDTO saveUser(UserDTO user) {
+        userRepository.save(new User(user.name(), user.email(), user.password()));
+        return new UserResponseDTO(user.name(), user.email());
+    }
 
-        return null;
+    public UserResponseDTO getUser(String id) throws Exception {
+        if (userRepository.existsById(id)) {
+            User user =  userRepository.findById(id).get();
+            return new UserResponseDTO(user.getName(), user.getEmail());
+        } else {
+            throw new Exception("User not found");
+        }
     }
 }

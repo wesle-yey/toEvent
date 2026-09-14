@@ -1,30 +1,30 @@
 package com.wesleyey.toEvent.model.users;
-import org.springframework.data.annotation.Id;
-import org.springframework.http.HttpEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 
-@Controller("/api/users")
+import org.springframework.web.bind.annotation.*;
+
+
+@RestController
+@RequestMapping("/api/users")
 public class UserController {
     /*
-    TODO: ROTAS GET POST PUT DELETE
+    TODO: ROTAS PUT DELETE
      */
+
     UserService userService;
 
-    public UserController(UserService userService) {
+    public UserController(
+            UserService userService
+    ) {
         this.userService = userService;
     }
 
-    @GetMapping("{id}")
-    public HttpEntity<UserResponseDTO> GetUser(@PathVariable Id id) {
-        try {
-            UserResponseDTO user= userService.getUserById(id);
+    @GetMapping
+    public UserResponseDTO getUser(@RequestParam String id) throws Exception {
+        return userService.getUser(id);
+    }
 
-            return new HttpEntity<>(new UserResponseDTO(user));
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        return null;
+    @PostMapping
+    public UserResponseDTO criarUsuario(@RequestBody UserDTO userDTO) {
+        return userService.saveUser(userDTO);
     }
-    }
+}
