@@ -1,6 +1,9 @@
 package com.wesleyey.toEvent.model.users;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.net.http.HttpResponse;
 
 
 @RestController
@@ -26,5 +29,11 @@ public class UserController {
     @PostMapping
     public UserResponseDTO criarUsuario(@RequestBody UserDTO userDTO) {
         return userService.saveUser(userDTO);
+    }
+
+    @DeleteMapping
+    public ResponseEntity<Object> deleteUser(@RequestParam String id) throws Exception {
+        userService.deleteUser(id);
+        return ResponseEntity.ok().build();
     }
 }

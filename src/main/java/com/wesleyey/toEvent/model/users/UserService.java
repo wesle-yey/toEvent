@@ -11,8 +11,8 @@ public class UserService {
     }
 
     public UserResponseDTO saveUser(UserDTO user) {
-        userRepository.save(new User(user.name(), user.email(), user.password()));
-        return new UserResponseDTO(user.name(), user.email());
+        userRepository.save(new User(user.getName(), user.getEmail(), user.getPassword()));
+        return new UserResponseDTO(user.getName(), user.getEmail());
     }
 
     public UserResponseDTO getUser(String id) throws Exception {
@@ -21,6 +21,12 @@ public class UserService {
             return new UserResponseDTO(user.getName(), user.getEmail());
         } else {
             throw new Exception("User not found");
+        }
+    }
+
+    public void deleteUser(String id) {
+        if (userRepository.existsById(id)) {
+            userRepository.deleteById(id);
         }
     }
 }
