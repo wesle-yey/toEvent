@@ -1,4 +1,7 @@
 package com.wesleyey.toEvent.model.events;
 
-public record EventResponseDTO() {
+public record EventResponseDTO(
+        String eventName,
+        String description
+) {
 }
