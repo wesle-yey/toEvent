@@ -3,9 +3,6 @@ package com.wesleyey.toEvent.model.users;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.http.HttpResponse;
-
-
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
