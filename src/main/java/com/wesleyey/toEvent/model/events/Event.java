@@ -6,6 +6,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 
 @Data
 @Document(collection = "events")
@@ -26,6 +27,6 @@ public class Event {
         this.eventName = eventName;
         this.description = description;
         this.userId = userId;
-        this.eventDate = LocalDate.now();
+        this.eventDate = LocalDate.now(ZoneId.of("UTC-3"));
     }
 }

@@ -1,6 +1,9 @@
 package com.wesleyey.toEvent.model.users;
 
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 public class UserService {
@@ -15,14 +18,15 @@ public class UserService {
         return new UserResponseDTO(user.getName(), user.getEmail());
     }
 
-    public UserResponseDTO getUser(String id) throws Exception {
-        if (userRepository.existsById(id)) {
-            User user =  userRepository.findById(id).get();
-            return new UserResponseDTO(user.getName(), user.getEmail());
-        } else {
-            throw new Exception("User not found");
+    public UserResponseDTO getUser(String id) throws ChangeSetPersister.NotFoundException {
+
+        Optional<User> user = Optional.of(
+                userRepository.findById(id)
+                        .orElseThrow(ChangeSetPersister.NotFoundException::new)
+        );
+
+        return new UserResponseDTO(user.get().getName(), user.get().getEmail());
         }
-    }
 
     public void deleteUser(String id) {
         if (userRepository.existsById(id)) {
