@@ -1,4 +1,4 @@
-package com.wesleyey.toEvent.model.users;
+package com.wesleyey.toEvent.models;
 
 import lombok.Data;
 import org.springframework.data.mongodb.core.mapping.Document;

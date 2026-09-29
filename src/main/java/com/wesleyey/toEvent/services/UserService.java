@@ -1,5 +1,9 @@
-package com.wesleyey.toEvent.model.users;
+package com.wesleyey.toEvent.services;
 
+import com.wesleyey.toEvent.models.User;
+import com.wesleyey.toEvent.DTOs.UserDTO;
+import com.wesleyey.toEvent.repositories.UserRepository;
+import com.wesleyey.toEvent.DTOs.UserResponseDTO;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
 

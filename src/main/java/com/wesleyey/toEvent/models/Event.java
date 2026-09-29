@@ -1,12 +1,10 @@
-package com.wesleyey.toEvent.model.events;
+package com.wesleyey.toEvent.models;
 
 import lombok.Data;
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
 
 @Data
 @Document(collection = "events")
@@ -18,15 +16,14 @@ public class Event {
 
     private String description;
 
-    @CreatedDate
     private LocalDate eventDate;
 
     private String userId;
 
-    public Event(String eventName, String description, String userId) {
+        public Event(String eventName, String description, String userId, LocalDate eventDate) {
         this.eventName = eventName;
         this.description = description;
         this.userId = userId;
-        this.eventDate = LocalDate.now(ZoneId.of("UTC-3"));
+        this.eventDate = eventDate;
     }
 }

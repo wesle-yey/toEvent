@@ -1,4 +1,4 @@
-package com.wesleyey.toEvent.model.users;
+package com.wesleyey.toEvent.DTOs;
 
 public record UserResponseDTO(
         String name,

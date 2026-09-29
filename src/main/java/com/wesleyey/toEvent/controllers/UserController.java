@@ -1,5 +1,9 @@
-package com.wesleyey.toEvent.model.users;
+package com.wesleyey.toEvent.controllers;
 
+import com.wesleyey.toEvent.DTOs.UserDTO;
+import com.wesleyey.toEvent.DTOs.UserResponseDTO;
+import com.wesleyey.toEvent.services.UserService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,7 +28,7 @@ public class UserController {
     }
 
     @PostMapping
-    public UserResponseDTO criarUsuario(@RequestBody UserDTO userDTO) {
+    public UserResponseDTO criarUsuario(@RequestBody @Valid UserDTO userDTO) {
         return userService.saveUser(userDTO);
     }
 

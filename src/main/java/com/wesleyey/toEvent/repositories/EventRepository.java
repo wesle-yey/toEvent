@@ -1,12 +1,12 @@
-package com.wesleyey.toEvent.model.events;
+package com.wesleyey.toEvent.repositories;
 
+import com.wesleyey.toEvent.models.Event;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface EventRepository extends MongoRepository<Event, String> {
-    Optional<List<Event>> getAllByUserId(String userId);
+    List<Event> getAllByUserId(String userId);
 }
