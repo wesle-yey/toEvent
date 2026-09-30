@@ -4,15 +4,13 @@ import com.wesleyey.toEvent.DTOs.UserDTO;
 import com.wesleyey.toEvent.DTOs.UserResponseDTO;
 import com.wesleyey.toEvent.services.UserService;
 import jakarta.validation.Valid;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
-    /*
-    TODO: ROTAS PUT DELETE
-     */
 
     UserService userService;
 
@@ -23,7 +21,7 @@ public class UserController {
     }
 
     @GetMapping
-    public UserResponseDTO getUser(@RequestParam String id) throws Exception {
+    public UserResponseDTO getUser(@RequestParam String id) throws ChangeSetPersister.NotFoundException {
         return userService.getUser(id);
     }
 
@@ -33,7 +31,7 @@ public class UserController {
     }
 
     @DeleteMapping
-    public ResponseEntity<Object> deleteUser(@RequestParam String id) throws Exception {
+    public ResponseEntity<Object> deleteUser(@RequestParam String id) {
         userService.deleteUser(id);
         return ResponseEntity.ok().build();
     }

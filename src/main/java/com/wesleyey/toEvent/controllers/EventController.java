@@ -36,11 +36,12 @@ public class EventController {
     @DeleteMapping("/{eventId}")
     public ResponseEntity<Void> deleteEvent(@PathVariable String eventId){
         eventService.deleteEventById(eventId);
-        return null;
+        return ResponseEntity.ok().build();
     }
 
-    @GetMapping("user")
-    public List<EventResponseDTO> getAllEvents(@RequestParam String userId){
-        return eventService.getAllEventsByUser(userId).orElse(new java.util.ArrayList<>());
+    @GetMapping("/user")
+    public ResponseEntity<List<EventResponseDTO>> getAllEvents(@RequestParam String userId){
+        return ResponseEntity.ok(eventService.getAllEventsByUser(userId));
     }
+
 }

@@ -42,16 +42,14 @@ public class EventService {
         }
     }
 
-    public Optional<List<EventResponseDTO>> getAllEventsByUser(String userId) {
-        List<Event> eventsList = eventRepository.getAllByUserId(userId);
-        List<EventResponseDTO> eventsResponseList = new java.util.ArrayList<>(List.of());
-        eventsList.forEach(eventResponse -> eventsResponseList.add(
-                new EventResponseDTO(
-                        eventResponse.getEventName(),
-                        eventResponse.getDescription(),
-                        eventResponse.getEventDate()
-                )
-            ));
-        return Optional.of(eventsResponseList);
-    }
+    public List<EventResponseDTO> getAllEventsByUser(String userId) {
+    return eventRepository.getAllByUserId(userId).stream()
+            .map(event -> new EventResponseDTO(
+                    event.getEventName(),
+                    event.getDescription(),
+                    event.getEventDate()
+            ))
+            .toList();
+}
+
 }
