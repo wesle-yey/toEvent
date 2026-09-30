@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <title>Eventos</title>
+    <link href="style.css" rel="stylesheet">
+</head>
+
+<body>
+
+    <div class="wrapper">
+        <div>
+            <h1>Seus eventos</h1>
+        </div>
+        <div class="notificationsContainer">
+            <div>
+                <input type="checkbox" id="notificationBtn" name="notification">
+                <label for="notification">Notificações</label>
+            </div>
+        </div>
+        <div id="eventsContainer">
+            <div class="event">
+                <div class="eventContent">
+                    <h3>Evento: Teste</h3>
+                    <div class="eventDate">
+                        <p>Data: 01/01/2022</p>
+                    </div>
+                </div>
+                <div>
+                    <button class="deleteBtn">Excluir</button>
+                </div>
+            </div>
+    
+        </div>
+    </div>
+
+    <script>
+        fetch('http://localhost:8080/api/events/user?userId=6ab56c3783441d6a4eca58af')
+            .then(response => response.json())
+            .then(data => {
+                const eventsList = document.getElementById('eventsContainer');
+                eventsList.innerHTML = '';
+                data.forEach(event => {
+                    const eventElement = document.createElement('div');
+                    eventElement.className = 'event';
+                    eventElement.innerHTML = `
+                        <div class="eventContent">
+                            <h3>Evento: ${event.eventName}</h3>
+                            <div class="eventDate">
+                                <p>Data: ${event.eventDate.dayOfMonth}/${event.eventDate.monthValue}/${event.eventDate.year}</p>
+                            </div>
+                        </div>
+                        <div class="delete">
+                            <button class="deleteBtn">Excluir</button>
+                        </div>
+                    `;
+                    eventsList.appendChild(eventElement);
+                });
+            });
+    </script>
+
+</body>
+
+</html>
