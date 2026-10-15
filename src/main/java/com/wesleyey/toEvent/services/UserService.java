@@ -20,12 +20,16 @@ public class UserService{
         this.passwordEncoder = passwordEncoder;
     }
 
-    public UserResponseDTO saveUser(UserDTO user) {
+    public UserResponseDTO saveUser(UserDTO user) throws Exception {
+        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
         userRepository.save(new User(
                 user.getName(),
                 user.getEmail(),
                 passwordEncoder.encode(user.getPassword())));
         return new UserResponseDTO(user.getName(), user.getEmail());
+        } else {
+            throw new Exception("User already exists");
+        }
     }
 
     public UserResponseDTO getUser(String id) throws ChangeSetPersister.NotFoundException {
