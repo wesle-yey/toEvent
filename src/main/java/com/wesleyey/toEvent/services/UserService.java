@@ -5,20 +5,26 @@ import com.wesleyey.toEvent.DTOs.UserDTO;
 import com.wesleyey.toEvent.repositories.UserRepository;
 import com.wesleyey.toEvent.DTOs.UserResponseDTO;
 import org.springframework.data.crossstore.ChangeSetPersister;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 @Service
-public class UserService {
+public class UserService{
     UserRepository userRepository;
+    PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository,  PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public UserResponseDTO saveUser(UserDTO user) {
-        userRepository.save(new User(user.getName(), user.getEmail(), user.getPassword()));
+        userRepository.save(new User(
+                user.getName(),
+                user.getEmail(),
+                passwordEncoder.encode(user.getPassword())));
         return new UserResponseDTO(user.getName(), user.getEmail());
     }
 

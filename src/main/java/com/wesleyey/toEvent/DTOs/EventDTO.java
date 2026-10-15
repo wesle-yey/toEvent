@@ -17,13 +17,9 @@ public class EventDTO {
     @NotNull
     private LocalDate eventDate;
 
-    @NotNull
-    private String userId;
-
-    public EventDTO(@NotBlank String eventName, @NotBlank String description, @NotNull String userId,  @NotNull LocalDate eventDate) {
+    public EventDTO(@NotBlank String eventName, @NotBlank String description,  @NotNull LocalDate eventDate) {
         this.eventName = eventName;
         this.description = description;
-        this.userId= userId;
         this.eventDate = eventDate;
     }
 }

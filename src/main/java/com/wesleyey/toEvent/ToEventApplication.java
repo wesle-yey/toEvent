@@ -2,24 +2,32 @@ package com.wesleyey.toEvent;
 
 import io.github.cdimascio.dotenv.Dotenv;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @OpenAPIDefinition(
-		info = @Info(
-				title = "toEvent API",
-				version = "1.0",
-				description = "API documentation for managing events"
-		)
+        info = @Info(
+                title = "toEvent API",
+                version = "1.0",
+                description = "API documentation for managing events"
+        ),
+        security = @SecurityRequirement(name = "bearerAuth")
 )
-
+@SecurityScheme(
+        name = "bearerAuth",
+        type = SecuritySchemeType.HTTP,
+        scheme = "bearer",
+        bearerFormat = "JWT"
+)
 @SpringBootApplication
 public class ToEventApplication {
-	public static void main(String[] args) {
-		// Inicializa variáveis de ambiente
-		Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
-		dotenv.entries().forEach(entry -> System.setProperty(entry.getKey(), entry.getValue()));
-		SpringApplication.run(ToEventApplication.class, args);
-	}
+    public static void main(String[] args) {
+        Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
+        dotenv.entries().forEach(entry -> System.setProperty(entry.getKey(), entry.getValue()));
+        SpringApplication.run(ToEventApplication.class, args);
+    }
 }

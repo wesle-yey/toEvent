@@ -1,11 +1,11 @@
 package com.wesleyey.toEvent.services;
 
+import com.wesleyey.toEvent.DTOs.EventDTO;
+import com.wesleyey.toEvent.DTOs.EventResponseDTO;
 import com.wesleyey.toEvent.models.Event;
 import com.wesleyey.toEvent.repositories.EventRepository;
-import com.wesleyey.toEvent.DTOs.EventResponseDTO;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,38 +18,42 @@ public class EventService {
         this.eventRepository = eventRepository;
     }
 
-    public Optional<EventResponseDTO> getEventById(String eventId) {
-    return eventRepository.findById(eventId)
-            .map(event -> new EventResponseDTO(
-                    event.getEventName(),
-                    event.getDescription(),
-                    event.getEventDate()
-            ));
-}
-
-    public EventResponseDTO addEvent(String eventName, String description, String userId, LocalDate eventDate) {
-        if (eventName == null || description == null || userId == null) {
-            return null;
-        } else {
-            eventRepository.save(new Event(eventName, description, userId, eventDate));
-            return new EventResponseDTO(eventName, description, eventDate);
-        }
-    }
-
-    public void deleteEventById(String id) {
-        if (eventRepository.findById(id).isPresent()) {
-            eventRepository.deleteById(id);
-        }
-    }
-
     public List<EventResponseDTO> getAllEventsByUser(String userId) {
-    return eventRepository.getAllByUserId(userId).stream()
-            .map(event -> new EventResponseDTO(
-                    event.getEventName(),
-                    event.getDescription(),
-                    event.getEventDate()
-            ))
-            .toList();
-}
+        return eventRepository.getAllByUserId(userId).stream()
+                .map(event -> new EventResponseDTO(
+                        event.getEventName(),
+                        event.getDescription(),
+                        event.getEventDate()
+                ))
+                .toList();
+    }
 
+    public Optional<EventResponseDTO> getEventByIdAndUser(String eventId, String userId) {
+        return eventRepository.findByIdAndUserId(eventId, userId)
+                .map(event -> new EventResponseDTO(
+                        event.getEventName(),
+                        event.getDescription(),
+                        event.getEventDate()
+                ));
+    }
+
+    public EventResponseDTO addEvent(EventDTO eventDTO, String userId) {
+        Event event = new Event(
+                eventDTO.getEventName(),
+                eventDTO.getDescription(),
+                userId,
+                eventDTO.getEventDate()
+        );
+        eventRepository.save(event);
+        return new EventResponseDTO(event.getEventName(), event.getDescription(), event.getEventDate());
+    }
+
+    public boolean deleteEventByIdAndUser(String eventId, String userId) {
+        Optional<Event> event = eventRepository.findByIdAndUserId(eventId, userId);
+        if (event.isPresent()) {
+            eventRepository.deleteByIdAndUserId(eventId, userId);
+            return true;
+        }
+        return false;
+    }
 }

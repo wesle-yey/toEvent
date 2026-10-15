@@ -2,13 +2,15 @@ package com.wesleyey.toEvent.controllers;
 
 import com.wesleyey.toEvent.DTOs.EventDTO;
 import com.wesleyey.toEvent.DTOs.EventResponseDTO;
+import com.wesleyey.toEvent.models.User;
 import com.wesleyey.toEvent.services.EventService;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/events")
@@ -20,28 +22,41 @@ public class EventController {
         this.eventService = eventService;
     }
 
+    // Retorna todos os eventos DO USUÁRIO LOGADO
     @GetMapping
-    public Optional<EventResponseDTO> getEvent(String eventId){
-        return eventService.getEventById(eventId);
+    public ResponseEntity<List<EventResponseDTO>> getAllMyEvents(@AuthenticationPrincipal User user) {
+        List<EventResponseDTO> events = eventService.getAllEventsByUser(user.getId());
+        return ResponseEntity.ok(events);
     }
 
+    // Retorna um evento específico se ele pertencer ao usuário logado
+    @GetMapping("/{eventId}")
+    public ResponseEntity<EventResponseDTO> getEvent(
+            @PathVariable String eventId,
+            @AuthenticationPrincipal User user) {
+        return eventService.getEventByIdAndUser(eventId, user.getId())
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    // Cria um evento associado automaticamente ao ID do usuário logado
     @PostMapping
-    public EventResponseDTO createEvent(@RequestBody @Valid EventDTO eventDTO){
-        return eventService.addEvent(eventDTO.getEventName(),
-        eventDTO.getDescription(),
-        eventDTO.getUserId(),
-        eventDTO.getEventDate());
+    public ResponseEntity<EventResponseDTO> createEvent(
+            @RequestBody @Valid EventDTO eventDTO,
+            @AuthenticationPrincipal User user) {
+        EventResponseDTO created = eventService.addEvent(eventDTO, user.getId());
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
+    // Deleta o evento apenas se pertencer ao usuário logado
     @DeleteMapping("/{eventId}")
-    public ResponseEntity<Void> deleteEvent(@PathVariable String eventId){
-        eventService.deleteEventById(eventId);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<Void> deleteEvent(
+            @PathVariable String eventId,
+            @AuthenticationPrincipal User user) {
+        boolean deleted = eventService.deleteEventByIdAndUser(eventId, user.getId());
+        if (deleted) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.notFound().build();
     }
-
-    @GetMapping("/user")
-    public ResponseEntity<List<EventResponseDTO>> getAllEvents(@RequestParam String userId){
-        return ResponseEntity.ok(eventService.getAllEventsByUser(userId));
-    }
-
 }
