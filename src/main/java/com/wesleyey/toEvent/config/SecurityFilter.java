@@ -1,5 +1,6 @@
 package com.wesleyey.toEvent.config;
 
+import com.wesleyey.toEvent.exception.InvalidTokenException;
 import com.wesleyey.toEvent.repositories.UserRepository;
 import com.wesleyey.toEvent.services.TokenService;
 import jakarta.servlet.FilterChain;
@@ -26,23 +27,30 @@ public class SecurityFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-            throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain) throws ServletException, IOException {
         String token = recoverToken(request);
-
-        if (token != null) {
-            String email = tokenService.validateToken(token);
-            if (email != null) {
-                UserDetails user = userRepository.findByEmail(email).orElse(null);
-                if (user != null) {
-                    var authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
-                }
-            }
+        if (token == null) {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Missing Authorization header");
+            return;
         }
 
+        try {
+            String email = tokenService.validateToken(token);
+            UserDetails user = userRepository.findByEmail(email).orElse(null);
+            if (user != null) {
+                UsernamePasswordAuthenticationToken authentication =
+                        new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            }
+        } catch (InvalidTokenException ex) {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, ex.getMessage());
+            return;
+        }
         filterChain.doFilter(request, response);
     }
+
 
     private String recoverToken(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");

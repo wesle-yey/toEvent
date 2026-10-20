@@ -4,6 +4,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.wesleyey.toEvent.exception.InvalidTokenException;
 import com.wesleyey.toEvent.models.User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -40,11 +41,12 @@ public class TokenService {
                     .withIssuer("toEvent-api")
                     .build()
                     .verify(token)
-                    .getSubject(); // Retorna o email do usuário
-        } catch (JWTVerificationException exception) {
-            return null; // Token inválido ou expirado
+                    .getSubject();
+        } catch (JWTVerificationException ex) {
+            throw new InvalidTokenException("Invalid or expired JWT", ex);
         }
     }
+
 
     private Instant generateExpirationDate() {
         // Expira em 2 horas no fuso horário do Brasil (-03:00)
