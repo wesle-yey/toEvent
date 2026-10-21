@@ -21,6 +21,7 @@ public class EventService {
     public List<EventResponseDTO> getAllEventsByUser(String userId) {
         return eventRepository.getAllByUserId(userId).stream()
                 .map(event -> new EventResponseDTO(
+                        event.getId(),
                         event.getEventName(),
                         event.getDescription(),
                         event.getEventDate()
@@ -31,6 +32,7 @@ public class EventService {
     public Optional<EventResponseDTO> getEventByIdAndUser(String eventId, String userId) {
         return eventRepository.findByIdAndUserId(eventId, userId)
                 .map(event -> new EventResponseDTO(
+                        event.getId(),
                         event.getEventName(),
                         event.getDescription(),
                         event.getEventDate()
@@ -45,7 +47,7 @@ public class EventService {
                 eventDTO.getEventDate()
         );
         eventRepository.save(event);
-        return new EventResponseDTO(event.getEventName(), event.getDescription(), event.getEventDate());
+        return new EventResponseDTO(event.getId(), event.getEventName(), event.getDescription(), event.getEventDate());
     }
 
     public boolean deleteEventByIdAndUser(String eventId, String userId) {

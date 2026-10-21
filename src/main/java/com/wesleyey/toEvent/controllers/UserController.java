@@ -5,11 +5,13 @@ import com.wesleyey.toEvent.DTOs.UserResponseDTO;
 import com.wesleyey.toEvent.exception.ErrorResponse;
 import com.wesleyey.toEvent.exception.UserAlreadyExistsException;
 import com.wesleyey.toEvent.exception.UserNotFoundException;
+import com.wesleyey.toEvent.models.User;
 import com.wesleyey.toEvent.services.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -23,18 +25,13 @@ public class UserController {
     }
 
     @GetMapping
-    public UserResponseDTO getUser(@RequestParam String id) {
-        return userService.getUser(id);
-    }
-
-    @PostMapping
-    public UserResponseDTO criarUsuario(@RequestBody @Valid UserDTO userDTO) {
-        return userService.saveUser(userDTO);
+    public UserResponseDTO getUser(@AuthenticationPrincipal User user) {
+        return userService.getUser(user.getId());
     }
 
     @DeleteMapping
-    public ResponseEntity<Void> deleteUser(@RequestParam String id) {
-        userService.deleteUser(id);
+    public ResponseEntity<Void> deleteUser(@AuthenticationPrincipal User user) {
+        userService.deleteUser(user.getId());
         return ResponseEntity.noContent().build();
     }
 
