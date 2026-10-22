@@ -42,31 +42,16 @@ public class SecurityConfig {
 
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
-                        // Rotas públicas – páginas Thymeleaf
-                        .requestMatchers("/login", "/error").permitAll()
-                        // Arquivos estáticos
-                        .requestMatchers("/resources/*").permitAll()
-                        // Rotas públicas – API REST
+                        // Public API endpoints
                         .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/register").permitAll()
                         // Swagger (dev only)
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-                        // Tudo mais requer autenticação
+                        // All other requests require authentication
                         .anyRequest().authenticated())
-                .formLogin(formLogin -> formLogin
-                        .usernameParameter("email")
-                        .passwordParameter("password")
-                        .loginPage("/login").permitAll()
-                        .failureUrl("/login?error")
-                )
                 .exceptionHandling(eh -> eh
-                        .authenticationEntryPoint((request, response, ex) -> {
-                            if (request.getRequestURI().startsWith("/api/")) {
-                                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
-                            } else {
-                                response.sendRedirect("/login");
-                            }
-                        }))
+                        .authenticationEntryPoint((request, response, ex) ->
+                                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized")))
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
