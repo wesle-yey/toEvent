@@ -5,6 +5,8 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Premium from './pages/Premium';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import NotFound from './pages/NotFound';
+import Logout from './pages/logout';
 
 function App() {
   return (
@@ -27,6 +29,22 @@ function App() {
           element={
             <ProtectedRoute>
               <Premium />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/error"
+          element={
+            <ProtectedRoute>
+              <NotFound />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/logout"
+          element={
+            <ProtectedRoute>
+              <Logout />
             </ProtectedRoute>
           }
         />
