@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from '../services/api';
 
 export default function Dashboard() {
     const [events, setEvents] = useState(null);
@@ -10,7 +10,7 @@ export default function Dashboard() {
         async function fetchEvents() {
             try {
                 setLoading(true);
-                const response = await axios.get('/api/events');
+                const response = await api.get('/api/events');
                 if (!response.ok) {
                     throw new Error('Failed to fetch events');
                 }
