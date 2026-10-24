@@ -5,8 +5,10 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
 public class UserDTO {
     @NotBlank(message = "O nome é obrigatório.")
     @Size(min = 3, message = "O nome deve conter no mínimo 3 letras.")

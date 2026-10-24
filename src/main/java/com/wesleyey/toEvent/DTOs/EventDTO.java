@@ -3,10 +3,12 @@ package com.wesleyey.toEvent.DTOs;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
 @Data
+@NoArgsConstructor
 public class EventDTO {
 
     @NotBlank
@@ -17,7 +19,7 @@ public class EventDTO {
     @NotNull
     private LocalDate eventDate;
 
-    public EventDTO(@NotBlank String eventName, @NotBlank String description,  @NotNull LocalDate eventDate) {
+    public EventDTO(String eventName, String description, LocalDate eventDate) {
         this.eventName = eventName;
         this.description = description;
         this.eventDate = eventDate;
