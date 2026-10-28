@@ -6,7 +6,7 @@ import Dashboard from './pages/Dashboard';
 import Premium from './pages/Premium';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import NotFound from './pages/NotFound';
-import Logout from './pages/logout';
+import Logout from './pages/Logout';
 
 function App() {
   return (
