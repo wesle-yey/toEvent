@@ -1,19 +1,18 @@
-### Building and running your application
+# Docker
 
-When you're ready, start your application by running:
-`docker compose up --build`.
+O Docker Compose inicia somente a API e conecta ao MongoDB Atlas configurado no `.env`; não inicia um banco local. Consulte o `README.md` para instruções de configuração, variáveis, frontend e endpoints.
 
-Your application will be available at http://localhost:8080.
+## Compilar e executar
 
-### Deploying your application to the cloud
+Execute:
 
-First, build your image, e.g.: `docker build -t myapp .`.
-If your cloud uses a different CPU architecture than your development
-machine (e.g., you are on a Mac M1 and your cloud provider is amd64),
-you'll want to build the image for that platform, e.g.:
-`docker build --platform=linux/amd64 -t myapp .`.
+```bash
+docker compose config
+docker compose up --build
+```
 
-Then, push it to your registry, e.g. `docker push myregistry.com/myapp`.
+A API ficará disponível em `http://localhost:8080`. Para encerrá-la, use `docker compose down`.
 
-Consult Docker's [getting started](https://docs.docker.com/go/get-started-sharing/)
-docs for more detail on building and pushing.
+## Publicação
+
+Para instruções específicas do ambiente de hospedagem, consulte a documentação do provedor; a imagem usa Java 17 e recebe as variáveis MongoDB/JWT via ambiente.

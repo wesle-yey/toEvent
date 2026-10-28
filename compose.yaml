@@ -17,6 +17,8 @@ services:
       MONGODB_URI: ${MONGODB_URI:?Set MONGODB_URI in .env}
       MONGODB_DATABASE: ${MONGODB_DATABASE:?Set MONGODB_DATABASE in .env}
       AUTH_TOKEN_SECRET: ${AUTH_TOKEN_SECRET:?Set AUTH_TOKEN_SECRET in .env}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:5173,http://localhost:3000}
+      SWAGGER_ENABLED: ${SWAGGER_ENABLED:-false}
 
 # The commented out section below is an example of how to define a PostgreSQL
 # database that your application can use. `depends_on` tells Docker Compose to
