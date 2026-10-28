@@ -99,6 +99,6 @@ npm run lint
 npm run build
 ```
 
-## Antes de publicar
+## Antes de publicar 
 
 Restrinja as origens CORS em `SecurityConfig`; atualmente a configuração aceita origens amplas. Use um segredo JWT forte, mantenha as credenciais do Atlas fora do Git e revise as regras de acesso à rede do cluster.
