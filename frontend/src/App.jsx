@@ -1,6 +1,6 @@
 import './App.css'
 
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Premium from './pages/Premium';
@@ -33,6 +33,17 @@ function App() {
           }
         />
         <Route
+          path="/logout"
+          element={
+            <ProtectedRoute>
+              <Logout />
+            </ProtectedRoute>
+          }
+        />
+        {/* Rota de erro e rota curinga protegidas:
+            - Se não autenticado, ProtectedRoute redireciona diretamente para /login
+            - Se autenticado, renderiza a tela 404 personalizada */}
+        <Route
           path="/error"
           element={
             <ProtectedRoute>
@@ -41,16 +52,13 @@ function App() {
           }
         />
         <Route
-          path="/logout"
+          path="*"
           element={
             <ProtectedRoute>
-              <Logout />
+              <NotFound />
             </ProtectedRoute>
           }
         />
-
-        {/* Redireciona qualquer rota desconhecida para o login */}
-        <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </Router>
   );
