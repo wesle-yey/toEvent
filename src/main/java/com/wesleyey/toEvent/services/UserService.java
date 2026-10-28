@@ -20,15 +20,20 @@ public class UserService{
     }
 
     public UserResponseDTO saveUser(UserDTO user) {
-        if (userRepository.findByEmail(user.getEmail()).isEmpty()) {
-        userRepository.save(new User(
-                user.getName(),
-                user.getEmail(),
-                passwordEncoder.encode(user.getPassword())));
-        return new UserResponseDTO(user.getName(), user.getEmail());
-        } else {
+        String email = User.normalizeEmail(user.getEmail());
+        if (userRepository.findByEmail(email).isPresent()) {
             throw new UserAlreadyExistsException("User already exists");
         }
+
+        try {
+            userRepository.save(new User(
+                    user.getName(),
+                    email,
+                    passwordEncoder.encode(user.getPassword())));
+        } catch (org.springframework.dao.DuplicateKeyException ex) {
+            throw new UserAlreadyExistsException("User already exists");
+        }
+        return new UserResponseDTO(user.getName(), email);
     }
 
     public UserResponseDTO getUser(String id) {

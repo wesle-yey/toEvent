@@ -1,14 +1,16 @@
 package com.wesleyey.toEvent.models;
 
 import lombok.Data;
-import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 
 @Data
 @Document(collection = "users")
@@ -18,14 +20,19 @@ public class User implements UserDetails {
 
     private String name;
 
+    @Indexed(unique = true)
     private String email;
 
     private String password;
 
     public User(String name, String email, String password) {
         this.name = name;
-        this.email = email;
+        this.email = normalizeEmail(email);
         this.password = password;
+    }
+
+    public static String normalizeEmail(String email) {
+        return email == null ? null : email.trim().toLowerCase(Locale.ROOT);
     }
 
     @Override
