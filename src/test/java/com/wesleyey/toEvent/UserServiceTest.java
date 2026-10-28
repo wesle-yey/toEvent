@@ -13,12 +13,14 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -54,6 +56,31 @@ class UserServiceTest {
         when(repo.findByEmail(dto.getEmail())).thenReturn(Optional.of(new User("Ana", "ana@example.com", "12345678")));
         assertThrows(UserAlreadyExistsException.class,
                 () -> service.saveUser(dto));
+    }
+
+    @Test
+    void saveUser_normalizesEmailForLookupAndPersistence() {
+        UserDTO dto = new UserDTO("Ana", " Ana@Example.com ", "12345678");
+        when(repo.findByEmail("ana@example.com")).thenReturn(Optional.empty());
+        when(encoder.encode(dto.getPassword())).thenReturn("encoded-password");
+
+        UserResponseDTO response = service.saveUser(dto);
+
+        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+        verify(repo).findByEmail("ana@example.com");
+        verify(repo).save(userCaptor.capture());
+        assertEquals("ana@example.com", userCaptor.getValue().getEmail());
+        assertEquals("ana@example.com", response.email());
+    }
+
+    @Test
+    void saveUser_duplicateKeyRace_throwsUserAlreadyExists() {
+        UserDTO dto = new UserDTO("Ana", "ana@example.com", "12345678");
+        when(repo.findByEmail(dto.getEmail())).thenReturn(Optional.empty());
+        when(encoder.encode(dto.getPassword())).thenReturn("encoded-password");
+        when(repo.save(any(User.class))).thenThrow(new DuplicateKeyException("duplicate email"));
+
+        assertThrows(UserAlreadyExistsException.class, () -> service.saveUser(dto));
     }
 
     @Test
