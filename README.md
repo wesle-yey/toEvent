@@ -1,4 +1,4 @@
-# toEvent
+# toEvent 
 
 Aplicação web para organizar eventos pessoais. O projeto contém uma API REST em Spring Boot, persistência em MongoDB e uma interface React/Vite.
 
