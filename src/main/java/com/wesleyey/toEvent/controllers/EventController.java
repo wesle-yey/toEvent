@@ -48,6 +48,17 @@ public class EventController {
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
+    // Atualiza um evento associado ao ID se pertencer ao usuário logado
+    @PutMapping("/{eventId}")
+    public ResponseEntity<EventResponseDTO> updateEvent(
+            @PathVariable String eventId,
+            @RequestBody @Valid EventDTO eventDTO,
+            @AuthenticationPrincipal User user) {
+        return eventService.updateEvent(eventId, eventDTO, user.getId())
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
     // Deleta o evento apenas se pertencer ao usuário logado
     @DeleteMapping("/{eventId}")
     public ResponseEntity<Void> deleteEvent(

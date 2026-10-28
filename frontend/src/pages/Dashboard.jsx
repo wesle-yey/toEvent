@@ -21,6 +21,7 @@ export default function Dashboard() {
   const [loadAttempt, setLoadAttempt] = useState(0);
   const [error, setError] = useState('');
   const [showEventForm, setShowEventForm] = useState(false);
+  const [editingEventId, setEditingEventId] = useState(null);
   const [eventName, setEventName] = useState('');
   const [eventDate, setEventDate] = useState('');
   const [description, setDescription] = useState('');
@@ -59,26 +60,63 @@ export default function Dashboard() {
     };
   }, [loadAttempt]);
 
-  async function handleCreateEvent(event) {
+  function handleOpenCreateForm() {
+    setEditingEventId(null);
+    setEventName('');
+    setEventDate('');
+    setDescription('');
+    setError('');
+    setShowEventForm(true);
+  }
+
+  function handleStartEdit(item) {
+    setEditingEventId(item.id);
+    setEventName(item.eventName || '');
+    setEventDate(item.eventDate || '');
+    setDescription(item.description || '');
+    setError('');
+    setShowEventForm(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function handleCloseForm() {
+    setShowEventForm(false);
+    setEditingEventId(null);
+    setEventName('');
+    setEventDate('');
+    setDescription('');
+  }
+
+  async function handleSaveEvent(event) {
     event.preventDefault();
     setError('');
     setSaving(true);
 
     try {
-      const response = await api.post('/api/events', {
-        eventName,
-        description,
-        eventDate,
-      });
-      setEvents((currentEvents) => [...currentEvents, response.data]);
-      setEventName('');
-      setEventDate('');
-      setDescription('');
-      setShowEventForm(false);
+      if (editingEventId) {
+        const response = await api.put(`/api/events/${encodeURIComponent(editingEventId)}`, {
+          eventName,
+          description,
+          eventDate,
+        });
+        setEvents((currentEvents) =>
+          currentEvents.map((item) => (item.id === editingEventId ? response.data : item)),
+        );
+      } else {
+        const response = await api.post('/api/events', {
+          eventName,
+          description,
+          eventDate,
+        });
+        setEvents((currentEvents) => [...currentEvents, response.data]);
+      }
+      handleCloseForm();
     } catch (requestError) {
       setError(
         requestError.response?.data?.message ||
-          'Não foi possível criar o evento. Verifique os dados e tente novamente.',
+          (editingEventId
+            ? 'Não foi possível atualizar o evento. Verifique os dados e tente novamente.'
+            : 'Não foi possível criar o evento. Verifique os dados e tente novamente.'),
       );
     } finally {
       setSaving(false);
@@ -131,7 +169,7 @@ export default function Dashboard() {
             <button
               className="button button-primary"
               type="button"
-              onClick={() => setShowEventForm((current) => !current)}
+              onClick={showEventForm && !editingEventId ? handleCloseForm : handleOpenCreateForm}
             >
               <span aria-hidden="true">+</span> Criar evento
             </button>
@@ -157,16 +195,16 @@ export default function Dashboard() {
         )}
 
         {showEventForm && (
-          <form className="event-form-card" onSubmit={handleCreateEvent}>
+          <form className="event-form-card" onSubmit={handleSaveEvent}>
             <div className="event-form-heading">
               <div>
-                <p className="eyebrow">Um novo momento</p>
-                <h2>Criar evento</h2>
+                <p className="eyebrow">{editingEventId ? 'Atualizar momento' : 'Um novo momento'}</p>
+                <h2>{editingEventId ? 'Editar evento' : 'Criar evento'}</h2>
               </div>
               <button
                 className="icon-button"
                 type="button"
-                onClick={() => setShowEventForm(false)}
+                onClick={handleCloseForm}
                 aria-label="Fechar formulário"
               >
                 ×
@@ -207,13 +245,13 @@ export default function Dashboard() {
               <button
                 className="button button-quiet"
                 type="button"
-                onClick={() => setShowEventForm(false)}
+                onClick={handleCloseForm}
                 disabled={saving}
               >
                 Cancelar
               </button>
               <button className="button button-primary" type="submit" disabled={saving}>
-                {saving ? 'Salvando...' : 'Salvar evento'}
+                {saving ? 'Salvando...' : editingEventId ? 'Salvar alterações' : 'Salvar evento'}
               </button>
             </div>
           </form>
@@ -233,7 +271,7 @@ export default function Dashboard() {
               <button
                 className="button button-primary"
                 type="button"
-                onClick={() => setShowEventForm(true)}
+                onClick={handleOpenCreateForm}
               >
                 Criar meu primeiro evento
               </button>
@@ -258,14 +296,24 @@ export default function Dashboard() {
                   <p className="event-full-date">{formatEventDate(item.eventDate)}</p>
                   {item.description && <p className="event-description">{item.description}</p>}
                 </div>
-                <button
-                  className="button button-danger"
-                  type="button"
-                  onClick={() => handleDeleteEvent(item.id)}
-                  disabled={deletingEventId === item.id}
-                >
-                  {deletingEventId === item.id ? 'Excluindo...' : 'Excluir'}
-                </button>
+                <div className="event-actions">
+                  <button
+                    className="button button-quiet"
+                    type="button"
+                    onClick={() => handleStartEdit(item)}
+                    disabled={saving || deletingEventId === item.id}
+                  >
+                    Editar
+                  </button>
+                  <button
+                    className="button button-danger"
+                    type="button"
+                    onClick={() => handleDeleteEvent(item.id)}
+                    disabled={deletingEventId === item.id}
+                  >
+                    {deletingEventId === item.id ? 'Excluindo...' : 'Excluir'}
+                  </button>
+                </div>
               </li>
             ))}
           </ul>

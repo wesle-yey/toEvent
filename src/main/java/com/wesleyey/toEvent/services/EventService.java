@@ -50,6 +50,19 @@ public class EventService {
         return new EventResponseDTO(event.getId(), event.getEventName(), event.getDescription(), event.getEventDate());
     }
 
+    public Optional<EventResponseDTO> updateEvent(String eventId, EventDTO eventDTO, String userId) {
+        Optional<Event> existing = eventRepository.findByIdAndUserId(eventId, userId);
+        if (existing.isEmpty()) {
+            return Optional.empty();
+        }
+        Event event = existing.get();
+        event.setEventName(eventDTO.getEventName());
+        event.setDescription(eventDTO.getDescription());
+        event.setEventDate(eventDTO.getEventDate());
+        eventRepository.save(event);
+        return Optional.of(new EventResponseDTO(event.getId(), event.getEventName(), event.getDescription(), event.getEventDate()));
+    }
+
     public boolean deleteEventByIdAndUser(String eventId, String userId) {
         Optional<Event> event = eventRepository.findByIdAndUserId(eventId, userId);
         if (event.isPresent()) {
