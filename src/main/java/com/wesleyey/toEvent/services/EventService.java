@@ -2,8 +2,11 @@ package com.wesleyey.toEvent.services;
 
 import com.wesleyey.toEvent.DTOs.EventDTO;
 import com.wesleyey.toEvent.DTOs.EventResponseDTO;
+import com.wesleyey.toEvent.exception.EventLimitExceededException;
 import com.wesleyey.toEvent.models.Event;
+import com.wesleyey.toEvent.models.User;
 import com.wesleyey.toEvent.repositories.EventRepository;
+import com.wesleyey.toEvent.repositories.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,10 +15,14 @@ import java.util.Optional;
 @Service
 public class EventService {
 
-    private final EventRepository eventRepository;
+    public static final int FREE_EVENT_LIMIT = 5;
 
-    public EventService(EventRepository eventRepository) {
+    private final EventRepository eventRepository;
+    private final UserRepository userRepository;
+
+    public EventService(EventRepository eventRepository, UserRepository userRepository) {
         this.eventRepository = eventRepository;
+        this.userRepository = userRepository;
     }
 
     public List<EventResponseDTO> getAllEventsByUser(String userId) {
@@ -40,6 +47,16 @@ public class EventService {
     }
 
     public EventResponseDTO addEvent(EventDTO eventDTO, String userId) {
+        User user = userRepository.findById(userId).orElse(null);
+        boolean isPremium = user != null && user.isPremium();
+
+        if (!isPremium) {
+            long currentCount = eventRepository.countByUserId(userId);
+            if (currentCount >= FREE_EVENT_LIMIT) {
+                throw new EventLimitExceededException(
+                        "Limite de " + FREE_EVENT_LIMIT + " eventos gratuitos atingido. Faça upgrade para o plano Premium.");
+            }
+        }
         Event event = new Event(
                 eventDTO.getEventName(),
                 eventDTO.getDescription(),

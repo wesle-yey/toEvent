@@ -38,6 +38,12 @@ public class SecurityFilter extends OncePerRequestFilter {
         }
 
         String path = request.getServletPath();
+        if (path == null || path.isEmpty()) {
+            path = request.getRequestURI();
+        }
+        if (path == null) {
+            path = "";
+        }
         boolean isPublic = path.equals("/login")
                 || path.equals("/api/auth/login")
                 || path.equals("/api/auth/register")

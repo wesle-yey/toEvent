@@ -25,6 +25,8 @@ public class User implements UserDetails {
 
     private String password;
 
+    boolean premium = false;
+
     public User(String name, String email, String password) {
         this.name = name;
         this.email = normalizeEmail(email);
@@ -63,5 +65,9 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+    public boolean isPremium() {
+        return premium;
     }
 }

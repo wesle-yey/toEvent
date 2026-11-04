@@ -15,6 +15,8 @@ function formatEventDate(value) {
   }).format(date);
 }
 
+const FREE_EVENT_LIMIT = 5;
+
 export default function Dashboard() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -28,6 +30,7 @@ export default function Dashboard() {
   const [saving, setSaving] = useState(false);
   const [deletingEventId, setDeletingEventId] = useState('');
   const navigate = useNavigate();
+  const isLimitReached = events.length >= FREE_EVENT_LIMIT;
 
   useEffect(() => {
     let active = true;
@@ -112,11 +115,16 @@ export default function Dashboard() {
       }
       handleCloseForm();
     } catch (requestError) {
+      const isLimitError =
+        requestError.response?.status === 403 ||
+        requestError.response?.data?.error === 'EVENT_LIMIT_EXCEEDED';
       setError(
         requestError.response?.data?.message ||
-          (editingEventId
-            ? 'Não foi possível atualizar o evento. Verifique os dados e tente novamente.'
-            : 'Não foi possível criar o evento. Verifique os dados e tente novamente.'),
+          (isLimitError
+            ? `Limite de ${FREE_EVENT_LIMIT} eventos gratuitos atingido. Faça upgrade para o plano Premium.`
+            : editingEventId
+              ? 'Não foi possível atualizar o evento. Verifique os dados e tente novamente.'
+              : 'Não foi possível criar o evento. Verifique os dados e tente novamente.'),
       );
     } finally {
       setSaving(false);
@@ -154,16 +162,38 @@ export default function Dashboard() {
           <span className="brand-mark" aria-hidden="true">t</span>
           <span>toEvent</span>
         </Link>
-        <button className="button button-quiet" type="button" onClick={handleLogout}>
-          Sair
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Link className="button button-quiet" to="/premium" style={{ color: '#264832' }}>
+            ⭐ Premium
+          </Link>
+          <button className="button button-quiet" type="button" onClick={handleLogout}>
+            Sair
+          </button>
+        </div>
       </header>
 
       <section className="events-content" aria-labelledby="events-title">
         <div className="section-heading">
           <div>
             <p className="eyebrow">Seus momentos, organizados</p>
-            <h1 id="events-title">Meus eventos</h1>
+            <h1 id="events-title">
+              Meus eventos{' '}
+              <span
+                style={{
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  color: isLimitReached ? '#92400e' : '#2b5238',
+                  backgroundColor: isLimitReached ? '#fef3c7' : '#eaf6ee',
+                  border: `1px solid ${isLimitReached ? '#fde68a' : '#cce7d3'}`,
+                  borderRadius: '9999px',
+                  padding: '3px 10px',
+                  marginLeft: '8px',
+                  verticalAlign: 'middle',
+                }}
+              >
+                {events.length}/{FREE_EVENT_LIMIT} gratuitos
+              </span>
+            </h1>
           </div>
           {!loading && events.length > 0 && (
             <button
@@ -176,21 +206,69 @@ export default function Dashboard() {
           )}
         </div>
 
+        {isLimitReached && !editingEventId && (
+          <div
+            className="form-message"
+            style={{
+              background: '#fffbeb',
+              borderColor: '#fde68a',
+              color: '#92400e',
+              marginBottom: '24px',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: '12px',
+            }}
+            role="status"
+          >
+            <div>
+              <strong>Limite de {FREE_EVENT_LIMIT} eventos gratuitos atingido.</strong>
+              <p style={{ margin: '4px 0 0', fontSize: '13px', color: '#b45309' }}>
+                Para cadastrar novos eventos sem restrições, faça upgrade para o plano Premium.
+              </p>
+            </div>
+            <Link
+              to="/premium"
+              className="button button-primary"
+              style={{
+                textDecoration: 'none',
+                minHeight: '36px',
+                padding: '0 14px',
+                fontSize: '13px',
+              }}
+            >
+              Conhecer Premium ⭐
+            </Link>
+          </div>
+        )}
+
         {error && (
           <div className="form-message form-message-error dashboard-error" role="alert">
             <span>{error}</span>
-            {!loading && (
-              <button
-                className="retry-button"
-                type="button"
-                onClick={() => {
-                  setLoading(true);
-                  setLoadAttempt((attempt) => attempt + 1);
-                }}
-              >
-                Tentar novamente
-              </button>
-            )}
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              {(error.toLowerCase().includes('limite') || error.toLowerCase().includes('premium')) && (
+                <Link
+                  to="/premium"
+                  className="button button-primary"
+                  style={{ textDecoration: 'none', minHeight: '32px', padding: '0 12px', fontSize: '12px' }}
+                >
+                  Ver Premium ⭐
+                </Link>
+              )}
+              {!loading && (
+                <button
+                  className="retry-button"
+                  type="button"
+                  onClick={() => {
+                    setLoading(true);
+                    setLoadAttempt((attempt) => attempt + 1);
+                  }}
+                >
+                  Tentar novamente
+                </button>
+              )}
+            </div>
           </div>
         )}
 
@@ -250,8 +328,23 @@ export default function Dashboard() {
               >
                 Cancelar
               </button>
-              <button className="button button-primary" type="submit" disabled={saving}>
-                {saving ? 'Salvando...' : editingEventId ? 'Salvar alterações' : 'Salvar evento'}
+              <button
+                className="button button-primary"
+                type="submit"
+                disabled={saving || (isLimitReached && !editingEventId)}
+                title={
+                  isLimitReached && !editingEventId
+                    ? `Limite de ${FREE_EVENT_LIMIT} eventos atingido`
+                    : ''
+                }
+              >
+                {saving
+                  ? 'Salvando...'
+                  : editingEventId
+                    ? 'Salvar alterações'
+                    : isLimitReached
+                      ? `Limite atingido (${FREE_EVENT_LIMIT}/${FREE_EVENT_LIMIT})`
+                      : 'Salvar evento'}
               </button>
             </div>
           </form>
