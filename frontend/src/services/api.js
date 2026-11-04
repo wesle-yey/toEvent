@@ -16,4 +16,18 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+// Interceptor: Trata respostas de erro globais (ex: 429 Rate-limit)
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 429 && !error.response.data?.message) {
+      error.response.data = {
+        ...(error.response.data || {}),
+        message: 'Muitas tentativas em pouco tempo. Aguarde alguns instantes antes de tentar novamente.',
+      };
+    }
+    return Promise.reject(error);
+  }
+);
+
 export default api;

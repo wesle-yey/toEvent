@@ -25,6 +25,7 @@ import java.util.List;
 public class SecurityConfig {
 
     private final SecurityFilter securityFilter;
+    private final RateLimitingFilter rateLimitingFilter;
 
     @Value("${cors.allowed-origins:http://localhost:5173,http://localhost:3000}")
     private String allowedOrigins;
@@ -32,8 +33,9 @@ public class SecurityConfig {
     @Value("${springdoc.swagger-ui.enabled:false}")
     private boolean swaggerEnabled;
 
-    public SecurityConfig(SecurityFilter securityFilter) {
+    public SecurityConfig(SecurityFilter securityFilter, RateLimitingFilter rateLimitingFilter) {
         this.securityFilter = securityFilter;
+        this.rateLimitingFilter = rateLimitingFilter;
     }
 
     @Bean
@@ -49,6 +51,7 @@ public class SecurityConfig {
                     cfg.setAllowedOrigins(origins);
                     cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                     cfg.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept"));
+                    cfg.setExposedHeaders(List.of("Retry-After"));
                     cfg.setAllowCredentials(false);
                     cfg.setMaxAge(3600L);
                     return cfg;
@@ -74,6 +77,7 @@ public class SecurityConfig {
                         .authenticationEntryPoint((request, response, ex) ->
                                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized")))
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(rateLimitingFilter, SecurityFilter.class)
                 .build();
     }
 
