@@ -1,6 +1,5 @@
 package com.wesleyey.toEvent.controllers;
 
-import com.wesleyey.toEvent.DTOs.UserDTO;
 import com.wesleyey.toEvent.DTOs.UserResponseDTO;
 import com.wesleyey.toEvent.exception.ErrorResponse;
 import com.wesleyey.toEvent.exception.UserAlreadyExistsException;
@@ -8,7 +7,6 @@ import com.wesleyey.toEvent.exception.UserNotFoundException;
 import com.wesleyey.toEvent.models.User;
 import com.wesleyey.toEvent.services.UserService;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
