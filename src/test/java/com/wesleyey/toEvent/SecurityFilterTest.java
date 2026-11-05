@@ -1,6 +1,7 @@
 package com.wesleyey.toEvent;
 
 import com.wesleyey.toEvent.config.SecurityFilter;
+import com.wesleyey.toEvent.models.User;
 import com.wesleyey.toEvent.repositories.UserRepository;
 import com.wesleyey.toEvent.services.TokenService;
 import org.junit.jupiter.api.DisplayName;
@@ -10,12 +11,21 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.lang.reflect.Method;
+import java.util.Optional;
+import jakarta.servlet.FilterChain;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class SecurityFilterTest {
@@ -81,5 +91,44 @@ class SecurityFilterTest {
     void shouldFilterPrivateEndpoints() throws Exception {
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/events");
         assertFalse(invokeShouldNotFilter(request));
+    }
+
+    @Test
+    @DisplayName("Requisições de alteração autenticadas por cookie rejeitam origens não permitidas")
+    void cookieAuthenticationRejectsUntrustedOrigin() throws Exception {
+        ReflectionTestUtils.setField(securityFilter, "authCookieName", "toEventAuth");
+        ReflectionTestUtils.setField(securityFilter, "allowedOrigins", "https://app.example.com");
+        MockHttpServletRequest request = new MockHttpServletRequest("DELETE", "/api/events/1");
+        request.setServletPath("/api/events/1");
+        request.setCookies(new jakarta.servlet.http.Cookie("toEventAuth", "jwt"));
+        request.addHeader("Origin", "https://attacker.example");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        FilterChain chain = mock(FilterChain.class);
+
+        securityFilter.doFilter(request, response, chain);
+
+        assertEquals(403, response.getStatus());
+        verifyNoInteractions(tokenService, userRepository, chain);
+    }
+
+    @Test
+    @DisplayName("Cookie JWT autentica requisições com origem confiável")
+    void cookieAuthenticationAcceptsUserRequest() throws Exception {
+        ReflectionTestUtils.setField(securityFilter, "authCookieName", "toEventAuth");
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/users");
+        request.setServletPath("/api/users");
+        request.setCookies(new jakarta.servlet.http.Cookie("toEventAuth", "jwt"));
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        FilterChain chain = mock(FilterChain.class);
+        User user = new User("Ana", "ana@example.com", "password");
+        when(tokenService.validateToken("jwt")).thenReturn("ana@example.com");
+        when(userRepository.findByEmail("ana@example.com")).thenReturn(Optional.of(user));
+
+        securityFilter.doFilter(request, response, chain);
+
+        verify(tokenService).validateToken("jwt");
+        verify(userRepository).findByEmail("ana@example.com");
+        verify(chain).doFilter(request, response);
+        SecurityContextHolder.clearContext();
     }
 }

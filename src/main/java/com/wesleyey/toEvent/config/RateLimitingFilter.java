@@ -7,6 +7,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -22,6 +23,9 @@ import java.util.concurrent.TimeUnit;
 public class RateLimitingFilter extends OncePerRequestFilter {
 
     private final RateLimitingService rateLimitingService;
+
+    @Value("${rate-limit.trust-forwarded-headers:false}")
+    private boolean trustForwardedHeaders;
 
     public RateLimitingFilter(RateLimitingService rateLimitingService) {
         this.rateLimitingService = rateLimitingService;
@@ -53,10 +57,10 @@ public class RateLimitingFilter extends OncePerRequestFilter {
         ConsumptionProbe probe = null;
 
         if ("/api/auth/register".equals(path) && "POST".equalsIgnoreCase(method)) {
-            String clientIp = extractClientIp(request);
+            String clientIp = extractClientIp(request, trustForwardedHeaders);
             probe = rateLimitingService.tryConsumeRegister(clientIp);
         } else if ("/api/auth/login".equals(path) && "POST".equalsIgnoreCase(method)) {
-            String clientIp = extractClientIp(request);
+            String clientIp = extractClientIp(request, trustForwardedHeaders);
             probe = rateLimitingService.tryConsumeLogin(clientIp);
         } else if (path.startsWith("/api/events")) {
             String identity = resolveUserIdentity(request);
@@ -93,7 +97,10 @@ public class RateLimitingFilter extends OncePerRequestFilter {
         return path != null ? path : "";
     }
 
-    public static String extractClientIp(HttpServletRequest request) {
+    public static String extractClientIp(HttpServletRequest request, boolean trustForwardedHeaders) {
+        if (!trustForwardedHeaders) {
+            return request.getRemoteAddr() != null ? request.getRemoteAddr() : "unknown-ip";
+        }
         String xForwardedFor = request.getHeader("X-Forwarded-For");
         if (xForwardedFor != null && !xForwardedFor.isBlank()) {
             // Em proxies como Render, o primeiro IP é o cliente real
@@ -117,6 +124,6 @@ public class RateLimitingFilter extends OncePerRequestFilter {
                 return authentication.getName();
             }
         }
-        return extractClientIp(request);
+        return extractClientIp(request, trustForwardedHeaders);
     }
 }

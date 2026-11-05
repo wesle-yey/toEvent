@@ -115,7 +115,8 @@ class RateLimitingTest {
         req.addHeader("X-Forwarded-For", "203.0.113.195, 70.41.3.18, 150.172.238.178");
         req.setRemoteAddr("10.0.0.1");
 
-        String ip = RateLimitingFilter.extractClientIp(req);
+        String ip = RateLimitingFilter.extractClientIp(req, true);
         assertEquals("203.0.113.195", ip);
+        assertEquals("10.0.0.1", RateLimitingFilter.extractClientIp(req, false));
     }
 }
