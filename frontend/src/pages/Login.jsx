@@ -24,13 +24,7 @@ export default function Login() {
         registrationCompleted = true;
       }
 
-      const response = await api.post('/api/auth/login', { email, password });
-      const token = response.data?.token;
-      if (!token) {
-        throw new Error('A API não retornou um token de acesso.');
-      }
-
-      localStorage.setItem('token', token);
+      await api.post('/api/auth/login', { email, password });
       navigate('/dashboard');
     } catch (requestError) {
       setError(

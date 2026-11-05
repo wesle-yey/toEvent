@@ -52,7 +52,7 @@ public class SecurityConfig {
                     cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                     cfg.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept"));
                     cfg.setExposedHeaders(List.of("Retry-After"));
-                    cfg.setAllowCredentials(false);
+                    cfg.setAllowCredentials(true);
                     cfg.setMaxAge(3600L);
                     return cfg;
                 }))
@@ -64,6 +64,7 @@ public class SecurityConfig {
                     // Endpoints públicos de autenticação
                     authorize.requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll();
                     authorize.requestMatchers(HttpMethod.POST, "/api/auth/register").permitAll();
+                    authorize.requestMatchers(HttpMethod.POST, "/api/auth/logout").permitAll();
 
                     // Documentação Swagger: liberada apenas quando explicitamente habilitada (ex: dev)
                     if (swaggerEnabled) {

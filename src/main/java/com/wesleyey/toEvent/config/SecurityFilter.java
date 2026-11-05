@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 @Component
 public class SecurityFilter extends OncePerRequestFilter {
@@ -24,6 +25,12 @@ public class SecurityFilter extends OncePerRequestFilter {
 
     @Value("${springdoc.swagger-ui.enabled:false}")
     private boolean swaggerEnabled;
+
+    @Value("${auth.cookie.name:toEventAuth}")
+    private String authCookieName;
+
+    @Value("${cors.allowed-origins:http://localhost:5173,http://localhost:3000}")
+    private String allowedOrigins;
 
     public SecurityFilter(TokenService tokenService, UserRepository userRepository) {
         this.tokenService = tokenService;
@@ -47,6 +54,7 @@ public class SecurityFilter extends OncePerRequestFilter {
         boolean isPublic = path.equals("/login")
                 || path.equals("/api/auth/login")
                 || path.equals("/api/auth/register")
+                || path.equals("/api/auth/logout")
                 || path.startsWith("/css/")
                 || path.startsWith("/js/")
                 || path.startsWith("/images/")
@@ -65,7 +73,12 @@ public class SecurityFilter extends OncePerRequestFilter {
             FilterChain filterChain) throws ServletException, IOException {
         String token = recoverToken(request);
         if (token == null) {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Missing Authorization header");
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Missing authentication token");
+            return;
+        }
+
+        if (!hasBearerToken(request) && !isAllowedCookieRequest(request)) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid request origin");
             return;
         }
 
@@ -86,9 +99,32 @@ public class SecurityFilter extends OncePerRequestFilter {
 
     private String recoverToken(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return null;
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            return authHeader.substring("Bearer ".length());
         }
-        return authHeader.replace("Bearer ", "");
+        if (request.getCookies() != null) {
+            return Arrays.stream(request.getCookies())
+                    .filter(cookie -> authCookieName.equals(cookie.getName()))
+                    .map(jakarta.servlet.http.Cookie::getValue)
+                    .findFirst()
+                    .orElse(null);
+        }
+        return null;
+    }
+
+    private boolean hasBearerToken(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+        return authHeader != null && authHeader.startsWith("Bearer ");
+    }
+
+    private boolean isAllowedCookieRequest(HttpServletRequest request) {
+        String method = request.getMethod();
+        if ("GET".equalsIgnoreCase(method) || "HEAD".equalsIgnoreCase(method)) {
+            return true;
+        }
+        String origin = request.getHeader("Origin");
+        return origin != null && Arrays.stream(allowedOrigins.split(","))
+                .map(String::trim)
+                .anyMatch(origin::equals);
     }
 }

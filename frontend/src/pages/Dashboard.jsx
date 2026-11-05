@@ -151,8 +151,7 @@ export default function Dashboard() {
   }
 
   function handleLogout() {
-    localStorage.removeItem('token');
-    navigate('/login');
+    navigate('/logout');
   }
 
   return (

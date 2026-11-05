@@ -5,8 +5,10 @@ import com.wesleyey.toEvent.exception.ErrorResponse;
 import com.wesleyey.toEvent.exception.UserAlreadyExistsException;
 import com.wesleyey.toEvent.exception.UserNotFoundException;
 import com.wesleyey.toEvent.models.User;
+import com.wesleyey.toEvent.services.AuthCookieService;
 import com.wesleyey.toEvent.services.UserService;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -17,9 +19,11 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
+    private final AuthCookieService authCookieService;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, AuthCookieService authCookieService) {
         this.userService = userService;
+        this.authCookieService = authCookieService;
     }
 
     @GetMapping
@@ -30,7 +34,9 @@ public class UserController {
     @DeleteMapping
     public ResponseEntity<Void> deleteUser(@AuthenticationPrincipal User user) {
         userService.deleteUser(user.getId());
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.noContent()
+                .header(HttpHeaders.SET_COOKIE, authCookieService.clear().toString())
+                .build();
     }
 
     // ----- EXCEPTION HANDLERS -----
