@@ -6,6 +6,7 @@ import com.wesleyey.toEvent.exception.UserAlreadyExistsException;
 import com.wesleyey.toEvent.exception.UserNotFoundException;
 import com.wesleyey.toEvent.models.User;
 import com.wesleyey.toEvent.repositories.UserRepository;
+import com.wesleyey.toEvent.repositories.EventRepository;
 import com.wesleyey.toEvent.services.UserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -29,6 +31,8 @@ class UserServiceTest {
 
     @Mock
     UserRepository repo;
+    @Mock
+    EventRepository eventRepository;
     @Mock
     PasswordEncoder encoder;
     @InjectMocks
@@ -88,5 +92,25 @@ class UserServiceTest {
         when(repo.findById("123")).thenReturn(Optional.empty());
         assertThrows(UserNotFoundException.class,
                 () -> service.getUser("123"));
+    }
+
+    @Test
+    void deleteUser_deletesUserEventsBeforeDeletingUser() {
+        when(repo.existsById("user-123")).thenReturn(true);
+
+        service.deleteUser("user-123");
+
+        var order = inOrder(eventRepository, repo);
+        order.verify(eventRepository).deleteByUserId("user-123");
+        order.verify(repo).deleteById("user-123");
+    }
+
+    @Test
+    void deleteUser_notFound_doesNotDeleteEvents() {
+        when(repo.existsById("missing")).thenReturn(false);
+
+        assertThrows(UserNotFoundException.class, () -> service.deleteUser("missing"));
+
+        org.mockito.Mockito.verifyNoInteractions(eventRepository);
     }
 }
