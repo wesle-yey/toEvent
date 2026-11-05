@@ -17,5 +17,7 @@ public interface EventRepository extends MongoRepository<Event, String> {
     // Permite deletar apenas se for do próprio usuário
     void deleteByIdAndUserId(String id, String userId);
 
+    void deleteByUserId(String userId);
+
     long countByUserId(String userId);
 }
