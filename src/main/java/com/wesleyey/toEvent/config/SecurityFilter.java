@@ -8,6 +8,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,6 +21,8 @@ import java.util.Arrays;
 
 @Component
 public class SecurityFilter extends OncePerRequestFilter {
+
+    private static final Logger logger = LoggerFactory.getLogger(SecurityFilter.class);
 
     private final TokenService tokenService;
     private final UserRepository userRepository;
@@ -73,11 +77,13 @@ public class SecurityFilter extends OncePerRequestFilter {
             FilterChain filterChain) throws ServletException, IOException {
         String token = recoverToken(request);
         if (token == null) {
+            logger.warn("Authentication rejected: missing token for {} {}", request.getMethod(), request.getServletPath());
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Missing authentication token");
             return;
         }
 
         if (!hasBearerToken(request) && !isAllowedCookieRequest(request)) {
+            logger.warn("Authentication rejected: untrusted origin for {} {}", request.getMethod(), request.getServletPath());
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid request origin");
             return;
         }
@@ -85,13 +91,17 @@ public class SecurityFilter extends OncePerRequestFilter {
         try {
             String email = tokenService.validateToken(token);
             UserDetails user = userRepository.findByEmail(email).orElse(null);
-            if (user != null) {
-                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(user, null,
-                        user.getAuthorities());
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+            if (user == null) {
+                logger.warn("Authentication rejected: token subject not found for {} {}", request.getMethod(), request.getServletPath());
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid or expired JWT");
+                return;
             }
+            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(user, null,
+                    user.getAuthorities());
+            SecurityContextHolder.getContext().setAuthentication(authentication);
         } catch (InvalidTokenException ex) {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, ex.getMessage());
+            logger.warn("Authentication rejected: invalid or expired token for {} {}", request.getMethod(), request.getServletPath());
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid or expired JWT");
             return;
         }
         filterChain.doFilter(request, response);

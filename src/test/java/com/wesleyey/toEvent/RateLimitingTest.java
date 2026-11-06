@@ -64,6 +64,28 @@ class RateLimitingTest {
     }
 
     @Test
+    void testFilter_AppliesGeneralEventRateLimitToUpdateAndDelete() throws ServletException, IOException {
+        FilterChain filterChain = mock(FilterChain.class);
+
+        for (String method : new String[] {"PUT", "DELETE"}) {
+            rateLimitingService.resetAll();
+            for (int i = 0; i < 60; i++) {
+                assertTrue(rateLimitingService.tryConsumeEventGeneral("127.0.0.1").isConsumed());
+            }
+
+            MockHttpServletRequest request = new MockHttpServletRequest(method, "/api/events/event-1");
+            request.setServletPath("/api/events/event-1");
+            MockHttpServletResponse response = new MockHttpServletResponse();
+
+            rateLimitingFilter.doFilter(request, response, filterChain);
+
+            assertEquals(429, response.getStatus(), method + " request should be rate limited");
+        }
+
+        verifyNoInteractions(filterChain);
+    }
+
+    @Test
     void testFilter_BlocksWith429WhenRegisterLimitExceeded() throws ServletException, IOException {
         String clientIp = "203.0.113.50";
         FilterChain filterChain = mock(FilterChain.class);

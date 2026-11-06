@@ -1,6 +1,8 @@
 package com.wesleyey.toEvent.config;
 
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,6 +25,8 @@ import java.util.List;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
 
     private final SecurityFilter securityFilter;
     private final RateLimitingFilter rateLimitingFilter;
@@ -76,7 +80,10 @@ public class SecurityConfig {
                 })
                 .exceptionHandling(eh -> eh
                         .authenticationEntryPoint((request, response, ex) ->
-                                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized")))
+                        {
+                            logger.warn("Authentication required for {} {}", request.getMethod(), request.getServletPath());
+                            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+                        }))
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterAfter(rateLimitingFilter, SecurityFilter.class)
                 .build();
