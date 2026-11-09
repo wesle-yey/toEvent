@@ -64,6 +64,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> {
                     // Permite preflight OPTIONS sem exigir autenticação
                     authorize.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll();
+                    authorize.requestMatchers(HttpMethod.GET, "/", "/health").permitAll();
+                    authorize.requestMatchers(HttpMethod.HEAD, "/", "/health").permitAll();
 
                     // Endpoints públicos de autenticação
                     authorize.requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll();

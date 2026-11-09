@@ -39,7 +39,7 @@ COPY ./src src/
 RUN --mount=type=bind,source=pom.xml,target=pom.xml \
     --mount=type=cache,target=/root/.m2 \
     ./mvnw package -DskipTests && \
-    mv target/$(./mvnw help:evaluate -Dexpression=project.artifactId -q -DforceStdout)-$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout).jar target/app.jar
+    mv target/*.jar target/app.jar
 
 ################################################################################
 
@@ -48,12 +48,6 @@ RUN --mount=type=bind,source=pom.xml,target=pom.xml \
 # the packaged application into separate layers that can be copied into the final stage.
 # See Spring's docs for reference:
 # https://docs.spring.io/spring-boot/docs/current/reference/html/container-images.html
-FROM package as extract
-
-WORKDIR /build
-
-RUN java -Djarmode=layertools -jar target/app.jar extract --destination target/extracted 2>/dev/null || echo "Layertools not available"
-
 ################################################################################
 
 # Create a new stage for running the application that contains the minimal

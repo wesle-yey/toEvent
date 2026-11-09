@@ -87,6 +87,16 @@ class SecurityFilterTest {
     }
 
     @Test
+    @DisplayName("Sondagens de saúde GET e HEAD não exigem token")
+    void shouldNotFilterHealthChecks() throws Exception {
+        MockHttpServletRequest rootHead = new MockHttpServletRequest("HEAD", "/");
+        MockHttpServletRequest healthGet = new MockHttpServletRequest("GET", "/health");
+
+        assertTrue(invokeShouldNotFilter(rootHead));
+        assertTrue(invokeShouldNotFilter(healthGet));
+    }
+
+    @Test
     @DisplayName("Endpoints privados como /api/events devem passar pelo filtro de autenticação")
     void shouldFilterPrivateEndpoints() throws Exception {
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/events");

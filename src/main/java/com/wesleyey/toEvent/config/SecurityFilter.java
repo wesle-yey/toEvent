@@ -56,6 +56,8 @@ public class SecurityFilter extends OncePerRequestFilter {
             path = "";
         }
         boolean isPublic = path.equals("/login")
+                || path.equals("/")
+                || path.equals("/health")
                 || path.equals("/api/auth/login")
                 || path.equals("/api/auth/register")
                 || path.equals("/api/auth/logout")

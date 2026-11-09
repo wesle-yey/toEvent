@@ -63,6 +63,7 @@ Render é uma opção adequada para hospedar a aplicação. Se frontend e API fo
 - `CORS_ALLOWED_ORIGINS`: URL exata do frontend, incluindo `https://`.
 - `AUTH_COOKIE_SECURE=true` e `AUTH_COOKIE_SAME_SITE=None` para permitir o cookie de sessão entre os domínios.
 - `TRUST_PROXY_HEADERS=true` para usar o IP encaminhado pelo proxy do Render no rate limit. Ative apenas quando a API só puder ser acessada pelo proxy confiável da plataforma.
+- Configure o health check do serviço para `GET /health`; `/` também responde como rota pública de saúde.
 
 Não use `*` em `CORS_ALLOWED_ORIGINS`. Se usar domínio próprio compartilhado entre frontend e API, ajuste `AUTH_COOKIE_SAME_SITE` de acordo com a origem e mantenha HTTPS.
 
