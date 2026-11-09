@@ -178,6 +178,7 @@ export default function Dashboard() {
             <h1 id="events-title">
               Meus eventos{' '}
               <span
+                className="event-count"
                 style={{
                   fontSize: '13px',
                   fontWeight: 600,
@@ -186,8 +187,6 @@ export default function Dashboard() {
                   border: `1px solid ${isLimitReached ? '#fde68a' : '#cce7d3'}`,
                   borderRadius: '9999px',
                   padding: '3px 10px',
-                  marginLeft: '8px',
-                  verticalAlign: 'middle',
                 }}
               >
                 {events.length}/{FREE_EVENT_LIMIT} gratuitos
