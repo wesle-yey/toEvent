@@ -8,6 +8,7 @@ import com.wesleyey.toEvent.services.AuthCookieService;
 import com.wesleyey.toEvent.services.TokenService;
 import com.wesleyey.toEvent.services.UserService;
 import jakarta.validation.Valid;
+import java.util.Map;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -32,14 +33,14 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Void> login(@RequestBody @Valid AuthenticationDTO data) {
+    public ResponseEntity<Map<String, String>> login(@RequestBody @Valid AuthenticationDTO data) {
         var usernamePassword = new UsernamePasswordAuthenticationToken(data.email(), data.password());
         var auth = this.authenticationManager.authenticate(usernamePassword);
 
         var token = tokenService.generateToken((User) auth.getPrincipal());
-        return ResponseEntity.noContent()
+        return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, authCookieService.create(token).toString())
-                .build();
+                .body(Map.of("token", token));
     }
 
     @PostMapping("/logout")

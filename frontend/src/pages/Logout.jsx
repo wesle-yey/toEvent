@@ -9,6 +9,7 @@ export default function Logout() {
   useEffect(() => {
     let active = true;
 
+    localStorage.removeItem('token');
     api.post('/api/auth/logout')
       .then(() => {
         if (active) navigate('/login', { replace: true });

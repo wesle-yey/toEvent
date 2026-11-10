@@ -24,7 +24,10 @@ export default function Login() {
         registrationCompleted = true;
       }
 
-      await api.post('/api/auth/login', { email, password });
+      const response = await api.post('/api/auth/login', { email, password });
+      if (response.data?.token) {
+        localStorage.setItem('token', response.data.token);
+      }
       navigate('/dashboard');
     } catch (requestError) {
       setError(
