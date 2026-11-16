@@ -71,6 +71,8 @@ public class SecurityConfig {
                     authorize.requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll();
                     authorize.requestMatchers(HttpMethod.POST, "/api/auth/register").permitAll();
                     authorize.requestMatchers(HttpMethod.POST, "/api/auth/logout").permitAll();
+                    authorize.requestMatchers(HttpMethod.POST, "/api/auth/verify-email").permitAll();
+                    authorize.requestMatchers(HttpMethod.POST, "/api/auth/resend-verification").permitAll();
 
                     // Documentação Swagger: liberada apenas quando explicitamente habilitada (ex: dev)
                     if (swaggerEnabled) {

@@ -65,6 +65,9 @@ public class RateLimitingFilter extends OncePerRequestFilter {
         if ("/api/auth/register".equals(path) && "POST".equalsIgnoreCase(method)) {
             String clientIp = extractClientIp(request, trustForwardedHeaders);
             probe = rateLimitingService.tryConsumeRegister(clientIp);
+        } else if ("/api/auth/resend-verification".equals(path) && "POST".equalsIgnoreCase(method)) {
+            String clientIp = extractClientIp(request, trustForwardedHeaders);
+            probe = rateLimitingService.tryConsumeResendVerification(clientIp);
         } else if ("/api/auth/login".equals(path) && "POST".equalsIgnoreCase(method)) {
             String clientIp = extractClientIp(request, trustForwardedHeaders);
             probe = rateLimitingService.tryConsumeLogin(clientIp);

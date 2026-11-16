@@ -19,6 +19,17 @@ public class RateLimitingService {
     private final Map<String, Bucket> loginBuckets = new ConcurrentHashMap<>();
     private final Map<String, Bucket> eventCreateBuckets = new ConcurrentHashMap<>();
     private final Map<String, Bucket> eventGeneralBuckets = new ConcurrentHashMap<>();
+    private final Map<String, Bucket> resendVerificationBuckets = new ConcurrentHashMap<>();
+
+    private Bucket createResendVerificationBucket() {
+        Bandwidth limit = Bandwidth.builder()
+                .capacity(5)
+                .refillGreedy(5, Duration.ofMinutes(5))
+                .build();
+        return Bucket.builder()
+                .addLimit(limit)
+                .build();
+    }
 
     private Bucket createRegisterBucket() {
         Bandwidth limit = Bandwidth.builder()
@@ -69,6 +80,10 @@ public class RateLimitingService {
 
     public ConsumptionProbe tryConsumeRegister(String clientIp) {
         return getBucket(registerBuckets, clientIp, this::createRegisterBucket).tryConsumeAndReturnRemaining(1);
+    }
+
+    public ConsumptionProbe tryConsumeResendVerification(String clientIp) {
+        return getBucket(resendVerificationBuckets, clientIp, this::createResendVerificationBucket).tryConsumeAndReturnRemaining(1);
     }
 
     public ConsumptionProbe tryConsumeLogin(String clientIp) {

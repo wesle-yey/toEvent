@@ -2,6 +2,8 @@ package com.wesleyey.toEvent.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -46,6 +48,38 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleUserNotFound(UserNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
                 "error", "USER_NOT_FOUND",
+                "message", ex.getMessage()
+        ));
+    }
+
+    @ExceptionHandler(DisabledException.class)
+    public ResponseEntity<Map<String, Object>> handleDisabled(DisabledException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of(
+                "error", "EMAIL_NOT_VERIFIED",
+                "message", "Conta não ativada. Por favor, confirme seu e-mail antes de entrar."
+        ));
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<Map<String, Object>> handleBadCredentials(BadCredentialsException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of(
+                "error", "BAD_CREDENTIALS",
+                "message", "E-mail ou senha inválidos."
+        ));
+    }
+
+    @ExceptionHandler(InvalidTokenException.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidToken(InvalidTokenException ex) {
+        return ResponseEntity.badRequest().body(Map.of(
+                "error", "INVALID_TOKEN",
+                "message", ex.getMessage()
+        ));
+    }
+
+    @ExceptionHandler(DisposableEmailException.class)
+    public ResponseEntity<Map<String, Object>> handleDisposableEmail(DisposableEmailException ex) {
+        return ResponseEntity.badRequest().body(Map.of(
+                "error", "DISPOSABLE_EMAIL",
                 "message", ex.getMessage()
         ));
     }

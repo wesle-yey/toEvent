@@ -8,6 +8,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
@@ -26,6 +27,12 @@ public class User implements UserDetails {
     private String password;
 
     boolean premium = false;
+
+    private boolean emailVerified = false;
+
+    private String verificationToken;
+
+    private Instant verificationTokenExpiresAt;
 
     public User(String name, String email, String password) {
         this.name = name;
@@ -64,7 +71,7 @@ public class User implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return this.emailVerified;
     }
 
     public boolean isPremium() {

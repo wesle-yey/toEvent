@@ -2,6 +2,7 @@ import './App.css'
 
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Login from './pages/Login';
+import VerifyEmail from './pages/VerifyEmail';
 import Dashboard from './pages/Dashboard';
 import Premium from './pages/Premium';
 import { ProtectedRoute } from './components/ProtectedRoute';
@@ -14,6 +15,7 @@ function App() {
       <Routes>
         {/* Rotas Públicas */}
         <Route path="/login" element={<Login />} />
+        <Route path="/verify-email" element={<VerifyEmail />} />
 
         {/* Rotas Privadas (Protegidas por JWT) */}
         <Route

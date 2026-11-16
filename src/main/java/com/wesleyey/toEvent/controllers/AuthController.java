@@ -1,8 +1,10 @@
 package com.wesleyey.toEvent.controllers;
 
 import com.wesleyey.toEvent.DTOs.AuthenticationDTO;
+import com.wesleyey.toEvent.DTOs.ResendVerificationDTO;
 import com.wesleyey.toEvent.DTOs.UserDTO;
 import com.wesleyey.toEvent.DTOs.UserResponseDTO;
+import com.wesleyey.toEvent.DTOs.VerifyEmailDTO;
 import com.wesleyey.toEvent.models.User;
 import com.wesleyey.toEvent.services.AuthCookieService;
 import com.wesleyey.toEvent.services.TokenService;
@@ -54,5 +56,17 @@ public class AuthController {
     public ResponseEntity<UserResponseDTO> register(@RequestBody @Valid UserDTO data) {
         UserResponseDTO userResponse = userService.saveUser(data);
         return ResponseEntity.ok(userResponse);
+    }
+
+    @PostMapping("/verify-email")
+    public ResponseEntity<Map<String, String>> verifyEmail(@RequestBody @Valid VerifyEmailDTO data) {
+        userService.verifyEmail(data.token());
+        return ResponseEntity.ok(Map.of("message", "E-mail verificado com sucesso! Você já pode entrar."));
+    }
+
+    @PostMapping("/resend-verification")
+    public ResponseEntity<Map<String, String>> resendVerification(@RequestBody @Valid ResendVerificationDTO data) {
+        userService.resendVerification(data.email());
+        return ResponseEntity.ok(Map.of("message", "Se o e-mail estiver cadastrado e pendente de verificação, um novo link foi enviado."));
     }
 }

@@ -61,6 +61,8 @@ public class SecurityFilter extends OncePerRequestFilter {
                 || path.equals("/api/auth/login")
                 || path.equals("/api/auth/register")
                 || path.equals("/api/auth/logout")
+                || path.equals("/api/auth/verify-email")
+                || path.equals("/api/auth/resend-verification")
                 || path.startsWith("/css/")
                 || path.startsWith("/js/")
                 || path.startsWith("/images/")

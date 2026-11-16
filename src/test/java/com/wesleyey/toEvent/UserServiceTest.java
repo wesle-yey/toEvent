@@ -35,8 +35,23 @@ class UserServiceTest {
     EventRepository eventRepository;
     @Mock
     PasswordEncoder encoder;
+    @Mock
+    com.wesleyey.toEvent.services.EmailService emailService;
+    @Mock
+    com.wesleyey.toEvent.services.EmailValidationService emailValidationService;
     @InjectMocks
     UserService service;
+
+    @Test
+    void saveUser_disposableEmail_throwsDisposableEmailException() {
+        UserDTO dto = new UserDTO("Fake", "fake@tempmail.com", "12345678");
+        org.mockito.Mockito.doThrow(new com.wesleyey.toEvent.exception.DisposableEmailException("E-mail temporário não permitido"))
+                .when(emailValidationService).validateEmail("fake@tempmail.com");
+
+        assertThrows(com.wesleyey.toEvent.exception.DisposableEmailException.class,
+                () -> service.saveUser(dto));
+        org.mockito.Mockito.verify(repo, org.mockito.Mockito.never()).save(org.mockito.ArgumentMatchers.any(User.class));
+    }
 
     @Test
     void saveUser_persistsAndReturnsName() {
