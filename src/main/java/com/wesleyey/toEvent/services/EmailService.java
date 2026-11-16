@@ -1,50 +1,41 @@
 package com.wesleyey.toEvent.services;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.mail.internet.MimeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
-
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.time.Duration;
-import java.util.List;
-import java.util.Map;
 
 @Service
 public class EmailService {
 
     private static final Logger logger = LoggerFactory.getLogger(EmailService.class);
-    private static final String RESEND_API_URL = "https://api.resend.com/emails";
 
-    private final String resendApiKey;
+    private final JavaMailSender mailSender;
+    private final String mailUsername;
     private final String fromEmail;
     private final String frontendUrl;
-    private final HttpClient httpClient;
-    private final ObjectMapper objectMapper;
 
     public EmailService(
-            @Value("${resend.api.key:}") String resendApiKey,
-            @Value("${resend.from.email:toEvent <onboarding@resend.dev>}") String fromEmail,
+            @Autowired(required = false) JavaMailSender mailSender,
+            @Value("${spring.mail.username:}") String mailUsername,
+            @Value("${mail.from.email:}") String fromEmail,
             @Value("${app.frontend.url:https://to-event.vercel.app}") String frontendUrl) {
-        this.resendApiKey = resendApiKey != null ? resendApiKey.trim() : "";
-        this.fromEmail = fromEmail;
+        this.mailSender = mailSender;
+        this.mailUsername = mailUsername != null ? mailUsername.trim() : "";
+        this.fromEmail = (fromEmail != null && !fromEmail.isBlank()) ? fromEmail.trim() : this.mailUsername;
         this.frontendUrl = frontendUrl.endsWith("/") ? frontendUrl.substring(0, frontendUrl.length() - 1) : frontendUrl;
-        this.objectMapper = new ObjectMapper();
-        this.httpClient = HttpClient.newBuilder()
-                .connectTimeout(Duration.ofSeconds(10))
-                .build();
     }
 
     public void sendVerificationEmail(String toEmail, String userName, String token) {
         String verificationUrl = frontendUrl + "/verify-email?token=" + token;
 
-        if (resendApiKey.isEmpty()) {
+        if (mailSender == null || mailUsername.isEmpty()) {
             logger.info("==================================================================");
-            logger.info("[DEV/TEST] RESEND_API_KEY não configurada. Simulação de envio de e-mail:");
+            logger.info("[DEV/TEST] MAIL_USERNAME não configurada. Simulação de envio de e-mail:");
             logger.info("Destinatário: {}", toEmail);
             logger.info("Link de ativação: {}", verificationUrl);
             logger.info("==================================================================");
@@ -52,34 +43,19 @@ public class EmailService {
         }
 
         try {
-            String htmlContent = buildVerificationEmailHtml(userName, verificationUrl);
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, "UTF-8");
 
-            Map<String, Object> payload = Map.of(
-                    "from", fromEmail,
-                    "to", List.of(toEmail),
-                    "subject", "Confirme seu e-mail - toEvent",
-                    "html", htmlContent
-            );
+            String sender = !fromEmail.isBlank() ? fromEmail : mailUsername;
+            helper.setFrom(sender, "toEvent");
+            helper.setTo(toEmail);
+            helper.setSubject("Confirme seu e-mail - toEvent");
+            helper.setText(buildVerificationEmailHtml(userName, verificationUrl), true);
 
-            String requestBody = objectMapper.writeValueAsString(payload);
-
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(RESEND_API_URL))
-                    .header("Authorization", "Bearer " + resendApiKey)
-                    .header("Content-Type", "application/json")
-                    .timeout(Duration.ofSeconds(15))
-                    .POST(HttpRequest.BodyPublishers.ofString(requestBody))
-                    .build();
-
-            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-
-            if (response.statusCode() >= 200 && response.statusCode() < 300) {
-                logger.info("E-mail de verificação enviado com sucesso para {} via Resend. Status: {}", toEmail, response.statusCode());
-            } else {
-                logger.error("Falha ao enviar e-mail via Resend para {}. Status: {}, Resposta: {}", toEmail, response.statusCode(), response.body());
-            }
+            mailSender.send(message);
+            logger.info("E-mail de confirmação enviado com sucesso via Gmail SMTP para {}", toEmail);
         } catch (Exception ex) {
-            logger.error("Erro inesperado ao enviar e-mail para {}: {}", toEmail, ex.getMessage(), ex);
+            logger.error("Erro ao enviar e-mail via Gmail SMTP para {}: {}", toEmail, ex.getMessage(), ex);
         }
     }
 
