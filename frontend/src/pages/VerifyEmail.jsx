@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import api from '../services/api';
 
 export default function VerifyEmail() {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const token = searchParams.get('token');
 
   const [status, setStatus] = useState('loading'); // 'loading' | 'success' | 'error'
@@ -23,8 +24,14 @@ export default function VerifyEmail() {
     api.post('/api/auth/verify-email', { token })
       .then((response) => {
         if (active) {
+          if (response.data?.token) {
+            localStorage.setItem('token', response.data.token);
+          }
           setStatus('success');
-          setMessage(response.data?.message || 'E-mail verificado com sucesso! Sua conta foi ativada.');
+          setMessage(response.data?.message || 'E-mail verificado com sucesso! Redirecionando para seus eventos...');
+          setTimeout(() => {
+            navigate('/dashboard', { replace: true });
+          }, 1500);
         }
       })
       .catch((err) => {
@@ -37,7 +44,7 @@ export default function VerifyEmail() {
     return () => {
       active = false;
     };
-  }, [token]);
+  }, [token, navigate]);
 
   async function handleResend(e) {
     e.preventDefault();

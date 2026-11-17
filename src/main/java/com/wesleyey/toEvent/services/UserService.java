@@ -59,7 +59,7 @@ public class UserService {
         return new UserResponseDTO(user.getName(), email);
     }
 
-    public void verifyEmail(String token) {
+    public User verifyEmail(String token) {
         if (token == null || token.isBlank()) {
             throw new InvalidTokenException("Token de verificação não informado.");
         }
@@ -74,7 +74,7 @@ public class UserService {
         user.setEmailVerified(true);
         user.setVerificationToken(null);
         user.setVerificationTokenExpiresAt(null);
-        userRepository.save(user);
+        return userRepository.save(user);
     }
 
     public void resendVerification(String rawEmail) {

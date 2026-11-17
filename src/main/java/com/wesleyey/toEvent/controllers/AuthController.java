@@ -60,8 +60,14 @@ public class AuthController {
 
     @PostMapping("/verify-email")
     public ResponseEntity<Map<String, String>> verifyEmail(@RequestBody @Valid VerifyEmailDTO data) {
-        userService.verifyEmail(data.token());
-        return ResponseEntity.ok(Map.of("message", "E-mail verificado com sucesso! Você já pode entrar."));
+        User verifiedUser = userService.verifyEmail(data.token());
+        String jwtToken = tokenService.generateToken(verifiedUser);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, authCookieService.create(jwtToken).toString())
+                .body(Map.of(
+                        "token", jwtToken,
+                        "message", "E-mail verificado com sucesso! Redirecionando para o seu dashboard..."
+                ));
     }
 
     @PostMapping("/resend-verification")
