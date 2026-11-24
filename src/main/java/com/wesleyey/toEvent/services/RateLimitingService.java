@@ -104,5 +104,6 @@ public class RateLimitingService {
         loginBuckets.clear();
         eventCreateBuckets.clear();
         eventGeneralBuckets.clear();
+        resendVerificationBuckets.clear();
     }
 }

@@ -76,6 +76,25 @@ public class GlobalExceptionHandler {
         ));
     }
 
+    @ExceptionHandler(VerificationEmailCooldownException.class)
+    public ResponseEntity<Map<String, Object>> handleVerificationCooldown(VerificationEmailCooldownException ex) {
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .header("Retry-After", String.valueOf(ex.getRetryAfterSeconds()))
+                .body(Map.of(
+                        "error", "VERIFICATION_EMAIL_COOLDOWN",
+                        "message", ex.getMessage(),
+                        "retryAfterSeconds", ex.getRetryAfterSeconds()
+                ));
+    }
+
+    @ExceptionHandler(EmailQuotaExceededException.class)
+    public ResponseEntity<Map<String, Object>> handleEmailQuotaExceeded(EmailQuotaExceededException ex) {
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(Map.of(
+                "error", "EMAIL_QUOTA_EXCEEDED",
+                "message", ex.getMessage()
+        ));
+    }
+
     @ExceptionHandler(DisposableEmailException.class)
     public ResponseEntity<Map<String, Object>> handleDisposableEmail(DisposableEmailException ex) {
         return ResponseEntity.badRequest().body(Map.of(

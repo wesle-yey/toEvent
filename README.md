@@ -47,9 +47,10 @@ BREVO_API_KEY=<chave-da-api-brevo>
 BREVO_SENDER_EMAIL=<remetente-verificado-no-brevo>
 BREVO_SENDER_NAME=toEvent
 FRONTEND_URL=http://localhost:5173
+MAIL_DAILY_LIMIT=250
 ```
 
-`FRONTEND_URL` é usada para montar o link de confirmação enviado por e-mail. Se `BREVO_API_KEY` ou `BREVO_SENDER_EMAIL` estiverem vazias, nenhum e-mail é enviado: o link de confirmação aparece no log da API, o que facilita o desenvolvimento local.
+`FRONTEND_URL` é usada para montar o link de confirmação enviado por e-mail. `MAIL_DAILY_LIMIT` é o máximo de e-mails por dia (UTC); mantenha-o abaixo da cota do plano Brevo (300/dia no gratuito). Se `BREVO_API_KEY` ou `BREVO_SENDER_EMAIL` estiverem vazias, nenhum e-mail é enviado: o link de confirmação aparece no log da API, o que facilita o desenvolvimento local.
 
 No PowerShell:
 
@@ -139,8 +140,8 @@ O token também é devolvido no corpo da resposta e aceito no cabeçalho `Author
 
 | Método | Endpoint | Descrição |
 | --- | --- | --- |
-| `POST` | `/api/auth/register` | Cria uma conta (`name`, `email`, `password`) e envia o e-mail de confirmação. |
-| `POST` | `/api/auth/verify-email` | Confirma o e-mail (`token` do link) e já define o cookie de sessão. |
+| `POST` | `/api/auth/register` | Cria uma conta (`name`, `email`, `password`) e envia o e-mail de confirmação. Se o e-mail já tiver uma conta **não confirmada**, substitui nome e senha e envia um novo link. |
+| `POST` | `/api/auth/verify-email` | Confirma o e-mail (`token` do link). Só entra automaticamente (`autoLogin: true`) no navegador que pediu o link; em outro, é preciso fazer login. |
 | `POST` | `/api/auth/resend-verification` | Reenvia o link de confirmação (`email`). Responde igual exista ou não a conta. |
 | `POST` | `/api/auth/login` | Autentica (`email`, `password`) e define o cookie de sessão. Retorna `403` com `EMAIL_NOT_VERIFIED` se o e-mail não foi confirmado. |
 | `POST` | `/api/auth/logout` | Encerra a sessão limpando o cookie. |
@@ -174,6 +175,7 @@ npm run build
 
 - **Premium não está implementado:** a página é ilustrativa, e não há fluxo de assinatura ou forma de alterar o status Premium.
 - **Exclusão de conta:** excluir a conta também exclui os eventos associados ao usuário.
+- **Envio de e-mails:** cada conta recebe no máximo 1 link de confirmação por minuto e 5 a cada 24 horas, e o total diário é limitado por `MAIL_DAILY_LIMIT` (contador no MongoDB). Contas não confirmadas são apagadas após 7 dias por um índice TTL do MongoDB. Ainda não há CAPTCHA no cadastro.
 - **Proteção contra abuso:** o rate limit é mantido em memória e não compartilha estado entre instâncias. Por padrão, o IP vem da conexão direta; configure `TRUST_PROXY_HEADERS=true` somente atrás de um proxy confiável que define os cabeçalhos encaminhados. No Render, configure também rate limit compartilhado se escalar para várias instâncias.
 - **Armazenamento de sessão:** o frontend guarda a sessão apenas no cookie `HttpOnly`, não acessível por JavaScript. As alterações autenticadas por cookie validam a origem; ainda assim, evite injeção de conteúdo e adote proteção contra XSS.
 - **Validação de eventos:** a API limita o nome a 120 caracteres e a descrição a 500, além das validações do formulário.

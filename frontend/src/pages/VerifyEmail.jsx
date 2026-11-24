@@ -24,11 +24,20 @@ export default function VerifyEmail() {
     api.post('/api/auth/verify-email', { token })
       .then((response) => {
         if (active) {
+          const autoLogin = response.data?.autoLogin === true;
           setStatus('success');
-          setMessage(response.data?.message || 'E-mail verificado com sucesso! Redirecionando para seus eventos...');
-          setTimeout(() => {
-            navigate('/dashboard', { replace: true });
-          }, 1500);
+          setMessage(
+            response.data?.message ||
+              (autoLogin
+                ? 'E-mail verificado com sucesso! Redirecionando para seus eventos...'
+                : 'E-mail confirmado! Entre com seu e-mail e senha para continuar.')
+          );
+          // Sem login automático (link aberto em outro navegador), o usuário entra pelo botão de login
+          if (autoLogin) {
+            setTimeout(() => {
+              navigate('/dashboard', { replace: true });
+            }, 1500);
+          }
         }
       })
       .catch((err) => {

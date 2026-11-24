@@ -34,6 +34,20 @@ public class User implements UserDetails {
 
     private Instant verificationTokenExpiresAt;
 
+    // Hash do código guardado em cookie no navegador que pediu o último envio do link.
+    // Só esse navegador entra automaticamente ao confirmar o e-mail.
+    private String verificationBrowserHash;
+
+    // Controle de envios do link de confirmação por conta (cooldown + máximo por 24h)
+    private Instant lastVerificationEmailAt;
+    private Instant verificationEmailWindowStart;
+    private int verificationEmailsInWindow;
+
+    // Contas não confirmadas são apagadas pelo MongoDB (índice TTL) quando esta data passa.
+    // Fica nulo depois da confirmação, então contas confirmadas nunca expiram.
+    @Indexed(expireAfter = "0s")
+    private Instant unverifiedExpiresAt;
+
     public User(String name, String email, String password) {
         this.name = name;
         this.email = normalizeEmail(email);
