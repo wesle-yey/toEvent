@@ -34,10 +34,7 @@ export default function Login() {
         return;
       }
 
-      const response = await api.post('/api/auth/login', { email, password });
-      if (response.data?.token) {
-        localStorage.setItem('token', response.data.token);
-      }
+      await api.post('/api/auth/login', { email, password });
       navigate('/dashboard');
     } catch (requestError) {
       const errorData = requestError.response?.data;

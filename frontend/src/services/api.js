@@ -1,21 +1,14 @@
 import axios from 'axios';
 
+// Em produção a API é acessada pelo mesmo domínio do frontend (proxy /api/* em vercel.json),
+// então o cookie HttpOnly de sessão é first-party e o token nunca fica acessível ao JavaScript.
+// Em desenvolvimento, o padrão é a API local; VITE_API_URL sobrescreve nos dois casos.
+const baseURL = import.meta.env.VITE_API_URL ?? (import.meta.env.DEV ? 'http://localhost:8080' : '');
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8080', // URL do seu backend Spring Boot
+  baseURL,
   withCredentials: true,
 });
-
-// Interceptor: Injeta o token JWT no cabeçalho Authorization se presente no localStorage
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
 
 // Interceptor: Trata respostas de erro globais (ex: 429 Rate-limit)
 api.interceptors.response.use(

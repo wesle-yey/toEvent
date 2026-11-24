@@ -14,9 +14,6 @@ export function ProtectedRoute({ children }) {
       })
       .catch((error) => {
         if (active) {
-          if (error.response?.status === 401) {
-            localStorage.removeItem('token');
-          }
           setStatus(error.response?.status === 401 ? 'unauthenticated' : 'error');
         }
       });

@@ -9,12 +9,13 @@ import com.wesleyey.toEvent.models.User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 
 @Service
 public class TokenService {
+
+    static final Duration TOKEN_TTL = Duration.ofHours(2);
 
     @Value("${auth.secret.token}")
     private String secret;
@@ -49,7 +50,7 @@ public class TokenService {
 
 
     private Instant generateExpirationDate() {
-        // Expira em 2 horas no fuso horário do Brasil (-03:00)
-        return LocalDateTime.now().plusHours(2).toInstant(ZoneOffset.of("-03:00"));
+        // Instant é absoluto (UTC): o fuso horário do servidor não altera a duração do token
+        return Instant.now().plus(TOKEN_TTL);
     }
 }

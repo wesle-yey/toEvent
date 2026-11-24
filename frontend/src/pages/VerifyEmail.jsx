@@ -24,9 +24,6 @@ export default function VerifyEmail() {
     api.post('/api/auth/verify-email', { token })
       .then((response) => {
         if (active) {
-          if (response.data?.token) {
-            localStorage.setItem('token', response.data.token);
-          }
           setStatus('success');
           setMessage(response.data?.message || 'E-mail verificado com sucesso! Redirecionando para seus eventos...');
           setTimeout(() => {
