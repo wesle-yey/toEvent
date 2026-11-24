@@ -105,7 +105,7 @@ public class EmailService {
                 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; margin: 0; padding: 24px; color: #1e293b;">
                     <div style="max-width: 560px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; padding: 32px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
                         <div style="margin-bottom: 24px; text-align: center;">
-                            <span style="display: inline-block; background-color: #4f46e5; color: #ffffff; font-weight: bold; font-size: 20px; width: 40px; height: 40px; line-height: 40px; border-radius: 8px; text-align: center;">t</span>
+                            <span style="display: inline-block; background-color: #bdeacb; color: #264e32; font-weight: 800; font-size: 20px; width: 40px; height: 40px; line-height: 40px; border-radius: 10px; text-align: center;">t</span>
                             <h2 style="margin: 12px 0 0 0; color: #0f172a; font-size: 22px;">toEvent</h2>
                         </div>
                         <h3 style="color: #0f172a; margin-top: 0;">Olá, %s!</h3>
@@ -113,13 +113,13 @@ public class EmailService {
                             Obrigado por criar sua conta no <strong>toEvent</strong>. Para começar a organizar seus eventos e ter acesso ao sistema, confirme seu endereço de e-mail clicando no botão abaixo:
                         </p>
                         <div style="text-align: center; margin: 32px 0;">
-                            <a href="%s" style="background-color: #4f46e5; color: #ffffff; text-decoration: none; padding: 12px 28px; border-radius: 8px; font-weight: 600; font-size: 15px; display: inline-block; box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2);">
+                            <a href="%s" style="background-color: #bdeacb; color: #264832; text-decoration: none; padding: 12px 28px; border-radius: 8px; font-weight: 600; font-size: 15px; display: inline-block; box-shadow: 0 5px 14px rgba(74, 145, 91, 0.15);">
                                 Confirmar meu e-mail
                             </a>
                         </div>
                         <p style="font-size: 13px; line-height: 1.5; color: #64748b;">
                             Se o botão não funcionar, copie e cole o seguinte link no seu navegador:<br>
-                            <a href="%s" style="color: #4f46e5; word-break: break-all;">%s</a>
+                            <a href="%s" style="color: #166534; word-break: break-all;">%s</a>
                         </p>
                         <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;">
                         <p style="font-size: 12px; color: #94a3b8; text-align: center; margin: 0;">
