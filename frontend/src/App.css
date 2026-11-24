@@ -219,6 +219,12 @@
   color: #a34138;
 }
 
+.form-message-success {
+  border: 1px solid #bbf7d0;
+  background: #dcfce7;
+  color: #166534;
+}
+
 .dashboard-page {
   min-height: 100vh;
   background:

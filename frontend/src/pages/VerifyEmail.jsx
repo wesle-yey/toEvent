@@ -71,10 +71,10 @@ export default function VerifyEmail() {
     <main className="auth-page">
       <div className="auth-card">
         <header className="auth-header">
-          <div className="brand">
-            <span className="brand-badge" aria-hidden="true">t</span>
-            <span className="brand-name">toEvent</span>
-          </div>
+          <Link className="brand" to="/login" aria-label="toEvent - página inicial">
+            <span className="brand-mark" aria-hidden="true">t</span>
+            toEvent
+          </Link>
           <h1>
             {status === 'loading' && 'Verificando e-mail...'}
             {status === 'success' && 'E-mail confirmado!'}
@@ -90,13 +90,13 @@ export default function VerifyEmail() {
 
         {status === 'success' && (
           <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-            <div className="auth-alert success" role="alert">
+            <div className="form-message form-message-success" role="alert">
               {message}
             </div>
-            <p style={{ color: 'var(--text-muted, #64748b)', fontSize: '0.95rem' }}>
+            <p style={{ color: '#778078', fontSize: '0.95rem' }}>
               Sua conta agora está totalmente liberada. Clique no botão abaixo para entrar e acessar seus eventos.
             </p>
-            <Link to="/login" className="btn-primary" style={{ textDecoration: 'none', display: 'block', textAlign: 'center' }}>
+            <Link to="/login" className="button button-primary" style={{ textDecoration: 'none' }}>
               Entrar na minha conta
             </Link>
           </div>
@@ -104,40 +104,40 @@ export default function VerifyEmail() {
 
         {status === 'error' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-            <div className="auth-alert error" role="alert">
+            <div className="form-message form-message-error" role="alert">
               {message}
             </div>
 
-            <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '1rem', marginTop: '0.5rem' }}>
-              <p style={{ fontSize: '0.9rem', color: '#475569', marginBottom: '0.75rem' }}>
-                Precisa de um novo link de confirmação?
-              </p>
+            <div style={{ borderTop: '1px solid #e1e6e1', paddingTop: '1.25rem' }}>
               <form onSubmit={handleResend} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                 {resendStatus && (
-                  <div className="auth-alert success" style={{ fontSize: '0.85rem' }}>
+                  <div className="form-message form-message-success">
                     {resendStatus}
                   </div>
                 )}
-                <input
-                  type="email"
-                  placeholder="Digite seu e-mail cadastrado"
-                  value={resendEmail}
-                  onChange={(e) => setResendEmail(e.target.value)}
-                  required
-                  disabled={resending}
-                  style={{ padding: '0.65rem 0.75rem', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                />
-                <button type="submit" className="btn-secondary" disabled={resending} style={{ padding: '0.65rem' }}>
+                <label className="field">
+                  <span>Precisa de um novo link de confirmação?</span>
+                  <input
+                    type="email"
+                    autoComplete="email"
+                    placeholder="Digite seu e-mail cadastrado"
+                    value={resendEmail}
+                    onChange={(e) => setResendEmail(e.target.value)}
+                    required
+                    disabled={resending}
+                  />
+                </label>
+                <button type="submit" className="button button-quiet" disabled={resending}>
                   {resending ? 'Enviando...' : 'Reenviar link de confirmação'}
                 </button>
               </form>
             </div>
 
-            <div style={{ textAlign: 'center', marginTop: '0.5rem' }}>
-              <Link to="/login" style={{ color: '#4f46e5', textDecoration: 'none', fontSize: '0.9rem' }}>
+            <p className="auth-switch" style={{ marginTop: 0 }}>
+              <Link to="/login" className="text-button" style={{ textDecoration: 'none' }}>
                 ← Voltar para a tela de login
               </Link>
-            </div>
+            </p>
           </div>
         )}
       </div>
