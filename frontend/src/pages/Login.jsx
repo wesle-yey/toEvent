@@ -93,7 +93,7 @@ export default function Login() {
           </h1>
           <p>
             {registrationSuccess
-              ? `Enviamos um link de ativação para ${registeredEmail}`
+              ? 'Falta pouco para ativar sua conta.'
               : registering
               ? 'Organize os momentos importantes em um só lugar.'
               : 'Seus momentos importantes, sempre por perto.'}
