@@ -71,12 +71,13 @@ Gere um segredo JWT forte (por exemplo, com `openssl rand -base64 48`) e URL-enc
 O frontend chama a API pelo **mesmo domínio** em que é servido: o `frontend/vercel.json` encaminha `/api/*` para a API no Render. Assim o cookie de sessão é first-party, funciona em navegadores que bloqueiam cookies de terceiros e o token nunca fica acessível ao JavaScript.
 
 1. Em `frontend/vercel.json`, o destino do proxy é a URL do serviço da API no Render (`https://toevent.onrender.com`); ajuste-a se o serviço mudar.
-2. Na Vercel, **não** defina `VITE_API_URL` (sem ela, o build de produção usa caminhos relativos e passa pelo proxy).
+2. Na Vercel, **não** defina `VITE_API_URL` (sem ela, o build de produção usa caminhos relativos e passa pelo proxy). Defina `PROXY_SHARED_SECRET` com um valor aleatório longo: o proxy envia esse valor no cabeçalho `X-Origin-Secret` em toda chamada a `/api/*`.
 3. No serviço da API no Render, configure:
    - `CORS_ALLOWED_ORIGINS`: URL exata do frontend, incluindo `https://` (ex.: `https://to-event.vercel.app`). Ela também é usada para validar a origem de requisições autenticadas por cookie.
    - `FRONTEND_URL`: a mesma URL do frontend, para os links de confirmação de e-mail.
    - `AUTH_COOKIE_SECURE=true` e `AUTH_COOKIE_SAME_SITE=Lax`.
-   - `TRUST_PROXY_HEADERS=true` para usar o IP do cliente (primeiro valor de `X-Forwarded-For`) no rate limit. Ative apenas quando a API só puder ser acessada por proxies confiáveis.
+   - `PROXY_SHARED_SECRET`: o mesmo valor configurado na Vercel. Com ele, `/api/*` recusa com `403` qualquer chamada que não veio pelo proxy, então ninguém consegue chamar o Render direto e forjar o `X-Forwarded-For`. Vazio, o bloqueio fica desligado (use só em desenvolvimento).
+   - `TRUST_PROXY_HEADERS=true` para usar o IP do cliente (primeiro valor de `X-Forwarded-For`) no rate limit. Ative apenas junto com `PROXY_SHARED_SECRET`, para que a API só aceite chamadas vindas do proxy da Vercel.
    - Health check em `GET /health`; `/` também responde como rota pública de saúde.
 
 Não use `*` em `CORS_ALLOWED_ORIGINS`.
